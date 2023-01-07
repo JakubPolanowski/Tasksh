@@ -3,12 +3,19 @@
 # VARS
 
 VERSION=0.0.1
+CONFIG=~/.config/taskshrc
 
 NAME=$(basename "$0")
 SHORT=h
 LONG=help
 
-# help
+if [ -f $CONFIG ]; then
+    echo 'hit'
+else
+    echo 'miss'
+fi
+
+# functions
 
 help() {
     # TODO
@@ -21,6 +28,7 @@ default() (
     echo TODO
     exit 0
 )
+
 
 # PARSE CLI
 
