@@ -223,8 +223,7 @@ add() {
 
         case "$1" in
 
-            -d | --due ) # TODO input validation and conversion to standard DATETIME value
-
+            -d | --due ) 
                 if ( echo "${2:--x}" | grep -qe '^-.*' ); then
                     echo "due (-d, --due) requires one argument, got zero"
                     exit 1
@@ -232,12 +231,16 @@ add() {
                     echo "due (-d, --due) only takes one argument, got more than one"
                     exit 1
                 fi
+
+                if ! TASK_DUE=$(date -d "$2" +%s); then
+                    echo "ERROR: Invalid date format, dates are parsed via the date command, see date --help for help"
+                    exit 1
+                fi
                 
-                TASK_DUE="$2"
                 shift 2
                 ;;
 
-            -s | --schedule ) # TODO input validation and conversion to standard DATETIME value
+            -s | --schedule ) 
 
                 if ( echo "${2:--x}" | grep -qe '^-.*' ); then
                     echo "schedule (-s, --schedule) requires one argument, got zero"
@@ -246,8 +249,12 @@ add() {
                     echo "schedule (-s, --schedule) only takes one argument, got more than one"
                     exit 1
                 fi
+
+                if ! TASK_SCHEDULE=$(date -d "$2" +%s); then
+                    echo "ERROR: Invalid date format, dates are parsed via the date command, see date --help for help"
+                    exit 1
+                fi
                 
-                TASK_SCHEDULE="$2"            
                 shift 2
                 ;;
 
