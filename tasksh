@@ -112,6 +112,7 @@ create_tasksh_dir() {
     done
 }
 
+# Handle configuration
 configure
 
 
