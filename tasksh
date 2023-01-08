@@ -56,27 +56,47 @@ help() {
         ;;
 
         add )
-            echo add HELP TODO
+            echo "Usage: $NAME add [OPTIONS]... [DESCRIPTION]"
+            echo "Add a task."
+            echo 
+            # TODO add remaining docs
         ;;
 
         agenda )
-            echo agenda HELP TODO
+            echo "Usage: $NAME agenda [OPTIONS]..."
+            echo "View your agenda generated based on tasks"
+            echo 
+            # TODO add remaining docs
         ;;
 
         config ) 
-            echo config HELP TODO
+            echo "Usage: $NAME config [OPTIONS]..."
+            echo "Edit $NAME configuration"
+            echo 
+            # TODO add remaining docs
         ;;
 
         edit )
-            echo edit HELP TODO
+            echo "Usage:     $NAME edit [TASK_ID] [OPTIONS]..."
+            echo "Alternate: $NAME edit [OPTIONS]..."
+            echo "Edits an existing task."
+            echo 
+            # TODO add remaining docs
         ;;
 
         list )
-            echo list HELP TODO
+            echo "Usage: $NAME list [OPTIONS]..."
+            echo "List tasks."
+            echo 
+            # TODO add remaining docs
         ;;
 
         view )
-            echo view HELP TODO
+            echo "Usage:     $NAME view [TASK_ID] [OPTIONS]..."
+            echo "Alternate: $NAME view [OPTIONS]..."
+            echo "View a task."
+            echo 
+            # TODO add remaining docs
         ;;
         
         * )
