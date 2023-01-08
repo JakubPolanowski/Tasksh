@@ -7,8 +7,6 @@ CONFIG=~/.config/taskshrc
 DEFAULT_FOLDER=~/tasksh
 
 NAME=$(basename "$0")
-SHORT=h
-LONG=help
 
 if [ -f $CONFIG ]; then
     # shellcheck disable=SC1090
@@ -40,6 +38,21 @@ help() {
             echo "  $NAME add -h"
             echo "  or for using the add shorthand"
             echo "  $NAME a -h"
+            echo
+            echo "There is technically a 7th 'no-mode' mode with two options:"
+            echo
+            echo "Help:"
+            echo "  This gets the general help message for $NAME"
+            echo
+            echo "  $NAME -h"
+            echo "  $NAME --help"
+            echo 
+            echo "Version:"
+            echo "  This gets the $NAME version"
+            echo
+            echo "  $NAME -v"
+            echo "  $NAME --version"
+
         ;;
 
         add )
@@ -164,23 +177,31 @@ create_tasksh_dir() {
 # Handle configuration
 configure
 
+# Mode functions
+add() {
+    shift
+    SHORT=h
+    LONG=help
+    OPTS=$(getopt -n "$NAME" -o $SHORT -l $LONG -- "$@")
+    if [ $? -ne -0 ]; then
+        exit 1
+    fi
+    echo "$@"
+    echo "$OPTS"
+}
+
 
 # PARSE CLI
-
-OPTS=$(getopt -n "$NAME" -o $SHORT -l $LONG -- "$@")
-if [ $? -ne -0 ]; then
-    exit 1
-fi
-
 if [ "$#" -eq 0 ]; then
     default
 fi
 
-# Parse Modes
+
+## Parse Modes
 case "$1" in
 
-    a | add )
-        echo TODO add
+    a | add ) # TODO
+        add "$@"
         ;;
     
     ag | agenda )
@@ -201,6 +222,15 @@ case "$1" in
 
     v | view )
         echo TODO view
+        ;;
+
+    -h | --help )
+        help
+        ;;
+
+    -v | --version )
+        echo v$VERSION
+        exit 0
         ;;
 
     * )
