@@ -340,16 +340,25 @@ add() {
 
     done
 
-    # TODO determine ID (check folder than increment highest by one)
+    # sed -n 's/^\([0-9][0-9]*\)\.\([a-z][a-z0-9]*\)\.\([A-Za-z0-9][A-Za-z0-9]*\)$/\1 \2 \3/p'
+    # \1 -> ID
+    # \2 -> timing info
+    # \3 -> task type
+
+    # start ID
+    TASK_ID=1
 
     # look in folder, get highest id and increment
-    if [ "$(ls -A "$TASKSH_DIR")" ]; then
-        echo NON EMPTY DIR LOCGIC NOT YET IMPLEMENTED
-        exit 1 # TODO
-    else # if folder is empty, start with ID = 1
-        TASK_ID=1
-    fi
+    for i in "$TASKSH_DIR"/*; do
+        CURRENT_ID=$(basename "$i" | sed -n 's/^\([0-9][0-9]*\)\.\([a-z][a-z0-9]*\)\.\([A-Za-z0-9][A-Za-z0-9]*\)$/\1/p')
 
+        : "${CURRENT_ID:=0}"
+
+        if [ "$CURRENT_ID" -ge "$TASK_ID" ]; then
+            TASK_ID=$((CURRENT_ID+1))
+        fi
+    done
+ 
     # incoporate task id into filename
     TASK_FILENAME="$TASK_ID"
 
@@ -367,15 +376,15 @@ add() {
     # incorporate type into filename
     TASK_FILENAME="$TASK_FILENAME.${TASK_TYPE-TODO}"
 
+    # make full path
+    TASK_PATH="$TASKSH_DIR/$TASK_FILENAME"
+
     # ensure file does not exist
-    if [ -f "$TASK_FILENAME" ]; then
+    if [ -f "$TASK_PATH" ]; then
         echo "ERROR: File already exist despite ID supposedly being incremented"
         echo "this is a error within TASKSH"
         exit 1
     fi
-
-    # make full path
-    TASK_PATH="$TASKSH_DIR/$TASK_FILENAME"
 
     # create file
     echo "$TASK_DESC" > "$TASK_PATH"
