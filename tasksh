@@ -20,6 +20,7 @@ fi
 # functions
 
 help() {
+
     # TODO
     echo TODO
     exit 0
@@ -37,8 +38,8 @@ configure() {
         echo "TASHSH has no folder set."
 
         echo "Specify a folder TASKSH should use to store data [$DEFAULT_FOLDER]: " 
-        read -r folder
-        TASKSH_DIR=${folder:-$DEFAULT_FOLDER}
+        read -r FOLDER
+        TASKSH_DIR=${FOLDER:-$DEFAULT_FOLDER}
 
         if [ ! -d "$TASKSH_DIR" ]; then
             create_tasksh_dir
@@ -47,8 +48,8 @@ configure() {
             echo "$TASKSH_DIR is not empty, are you sure you want to use this folder? y/[n]"
 
             while true; do
-                read -r yn
-                case "${yn:-n}" in
+                read -r YN
+                case "${YN:-n}" in
                     y ) 
                         echo "Successfully created TASKSH folder ($TASKSH_DIR)"
                         if echo "TASKSH_DIR=\"$TASKSH_DIR\"" >> $CONFIG; then
@@ -82,8 +83,8 @@ create_tasksh_dir() {
     echo "$TASKSH_DIR does not exist, would you like to create it y/[n]"
             
     while true; do
-        read -r yn
-        case "${yn:-n}" in
+        read -r YN
+        case "${YN:-n}" in
             y ) 
                 if mkdir -p "$TASKSH_DIR"; then
                     echo "Successfully created TASKSH folder ($TASKSH_DIR)"
