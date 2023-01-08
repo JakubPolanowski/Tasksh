@@ -4,15 +4,17 @@
 
 VERSION=0.0.1
 CONFIG=~/.config/taskshrc
+DEFAULT_FOLDER=~/tasksh
 
 NAME=$(basename "$0")
 SHORT=h
 LONG=help
 
 if [ -f $CONFIG ]; then
-    echo 'hit'
+    # shellcheck disable=SC1090
+    . $CONFIG
 else
-    echo 'miss'
+    touch $CONFIG
 fi
 
 # functions
@@ -23,11 +25,86 @@ help() {
     exit 0
 }
 
-default() (
-    # TODO
-    echo TODO
-    exit 0
-)
+default() {
+    echo TASKSH v$VERSION
+
+    help
+}
+
+configure() {
+    # check notes dir
+    if [ -z ${TASKSH_DIR+x} ]; then
+        echo "TASHSH has no folder set."
+
+        echo "Specify a folder TASKSH should use to store data [$DEFAULT_FOLDER]: " 
+        read -r folder
+        TASKSH_DIR=${folder:-$DEFAULT_FOLDER}
+    fi
+
+    if [ ! -d "$TASKSH_DIR" ]; then
+        echo "$TASKSH_DIR does not exist, would you like to create it y/[n]"
+        
+        while true; do
+            read -r yn
+            case "${yn:-n}" in
+                y ) 
+                    if mkdir -p "$TASKSH_DIR"; then
+                        echo "Successfully created TASKSH folder ($TASKSH_DIR)"
+                        if echo "TASKSH_DIR=\"$TASKSH_DIR\"" >> $CONFIG; then
+                            echo "Successfully added TASKSH_DIR to TASKSH config"
+                        else
+                            echo "FAILED to add TASKSH_DIR to TASKSH config"
+                            exit 1
+                        fi
+                    else
+                        echo "FAILED TO create TASKSH folder ($TASKSH_DIR)"
+                        exit 1
+                    fi
+
+                    break
+                    ;;
+
+                n ) 
+                    echo "TASKSH requires a folder to function, exiting"
+
+                    exit 1
+                    ;;
+
+                * ) echo "Invalid response, input y or n";;
+            esac
+        done
+
+    elif [ "$(ls -A "$TASKSH_DIR")" ]; then
+        echo "$TASKSH_DIR is not empty, are you sure you want to use this folder? y/[n]"
+
+        while true; do
+            read -r yn
+            case "${yn:-n}" in
+                y ) 
+                    echo "Successfully created TASKSH folder ($TASKSH_DIR)"
+                    if echo "TASKSH_DIR=\"$TASKSH_DIR\"" >> $CONFIG; then
+                        echo "Successfully added TASKSH_DIR to TASKSH config"
+                    else
+                        echo "FAILED to add TASKSH_DIR to TASKSH config"
+                        exit 1
+                    fi
+
+                    break
+                    ;;
+
+                n ) 
+                    echo "TASKSH requires a folder to function, exiting"
+
+                    exit 1
+                    ;;
+
+                * ) echo "Invalid response, input y or n";;
+            esac
+        done
+    fi
+}
+
+configure
 
 
 # PARSE CLI
@@ -57,9 +134,11 @@ while :; do
 
     *)
         echo "Unexpected option: $1"
-        help
+        default
         ;;
 
     esac
 done
+
+# run
 
