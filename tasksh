@@ -352,6 +352,13 @@ add() {
     # incorporate type into filename
     TASK_FILENAME="$TASK_FILENAME.${TASK_TYPE-TODO}"
 
+    # ensure file does not exist
+    if [ -f "$TASK_FILENAME" ]; then
+        echo "ERROR: File already exist despite ID supposedly being incremented"
+        echo "this is a error within TASKSH"
+        exit 1
+    fi
+
     # TODO handle ADD logic
 }
 
