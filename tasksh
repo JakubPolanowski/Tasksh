@@ -56,27 +56,27 @@ help() {
         ;;
 
         add )
-            echo add TODO
+            echo add HELP TODO
         ;;
 
         agenda )
-            echo agenda TODO
+            echo agenda HELP TODO
         ;;
 
         config ) 
-            echo config TODO
+            echo config HELP TODO
         ;;
 
         edit )
-            echo edit TODO
+            echo edit HELP TODO
         ;;
 
         list )
-            echo list TODO
+            echo list HELP TODO
         ;;
 
         view )
-            echo view TODO
+            echo view HELP TODO
         ;;
         
         * )
@@ -179,15 +179,41 @@ configure
 
 # Mode functions
 add() {
-    shift
-    SHORT=h
+    shift # shift over mode
+
+    SHORT=h # TODO implemented options
     LONG=help
+
     OPTS=$(getopt -n "$NAME" -o $SHORT -l $LONG -- "$@")
     if [ $? -ne -0 ]; then
         exit 1
     fi
-    echo "$@"
-    echo "$OPTS"
+
+    if [ "$#" -eq 0 ]; then
+        help add
+    fi
+
+    eval set -- "$OPTS"
+
+    while :; do
+        case "$1" in # TODO implemented options
+
+        -h | --help)
+            help add
+            ;;
+
+        --)
+            shift
+            break
+            ;;
+
+        *)
+            echo "ERROR: Invalid option, see help (-h, --help)" 
+            exit 1   
+            ;;
+
+        esac
+    done
 }
 
 
@@ -237,28 +263,3 @@ case "$1" in
         echo "ERROR: Invalid mode, see help (-h, --help)" 
         exit 1       
 esac
-
-# eval set -- "$OPTS"
-
-# while :; do
-#     case "$1" in 
-
-#     -h | --help)
-#         help
-#         ;;
-
-#     --)
-#         shift
-#         break
-#         ;;
-
-#     *)
-#         echo "Unexpected option: $1"
-#         default
-#         ;;
-
-#     esac
-# done
-
-# # run
-
