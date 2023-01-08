@@ -41,37 +41,7 @@ configure() {
         TASKSH_DIR=${folder:-$DEFAULT_FOLDER}
 
         if [ ! -d "$TASKSH_DIR" ]; then
-            echo "$TASKSH_DIR does not exist, would you like to create it y/[n]"
-            
-            while true; do
-                read -r yn
-                case "${yn:-n}" in
-                    y ) 
-                        if mkdir -p "$TASKSH_DIR"; then
-                            echo "Successfully created TASKSH folder ($TASKSH_DIR)"
-                            if echo "TASKSH_DIR=\"$TASKSH_DIR\"" >> $CONFIG; then
-                                echo "Successfully added TASKSH_DIR to TASKSH config"
-                            else
-                                echo "FAILED to add TASKSH_DIR to TASKSH config"
-                                exit 1
-                            fi
-                        else
-                            echo "FAILED TO create TASKSH folder ($TASKSH_DIR)"
-                            exit 1
-                        fi
-
-                        break
-                        ;;
-
-                    n ) 
-                        echo "TASKSH requires a folder to function, exiting"
-
-                        exit 1
-                        ;;
-
-                    * ) echo "Invalid response, input y or n";;
-                esac
-            done
+            create_tasksh_dir
 
         elif [ "$(ls -A "$TASKSH_DIR")" ]; then
             echo "$TASKSH_DIR is not empty, are you sure you want to use this folder? y/[n]"
@@ -102,6 +72,44 @@ configure() {
             done
         fi
     fi
+
+    if [ ! -d "$TASKSH_DIR" ]; then
+        create_tasksh_dir
+    fi
+}
+
+create_tasksh_dir() {
+    echo "$TASKSH_DIR does not exist, would you like to create it y/[n]"
+            
+    while true; do
+        read -r yn
+        case "${yn:-n}" in
+            y ) 
+                if mkdir -p "$TASKSH_DIR"; then
+                    echo "Successfully created TASKSH folder ($TASKSH_DIR)"
+                    if echo "TASKSH_DIR=\"$TASKSH_DIR\"" >> $CONFIG; then
+                        echo "Successfully added TASKSH_DIR to TASKSH config"
+                    else
+                        echo "FAILED to add TASKSH_DIR to TASKSH config"
+                        exit 1
+                    fi
+                else
+                    echo "FAILED TO create TASKSH folder ($TASKSH_DIR)"
+                    exit 1
+                fi
+
+                break
+                ;;
+
+            n ) 
+                echo "TASKSH requires a folder to function, exiting"
+
+                exit 1
+                ;;
+
+            * ) echo "Invalid response, input y or n";;
+        esac
+    done
 }
 
 configure
