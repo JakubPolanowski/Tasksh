@@ -234,7 +234,7 @@ case "$1" in
         ;;
 
     * )
-        echo "ERROR: Invalid mode, see --help (-h)" 
+        echo "ERROR: Invalid mode, see help (-h, --help)" 
         exit 1       
 esac
 
