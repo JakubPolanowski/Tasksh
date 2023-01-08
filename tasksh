@@ -258,20 +258,6 @@ add() {
                 shift 2
                 ;;
 
-            -l | --loop ) # TODO input validation and standard loop format
-
-                if ( echo "${2:--x}" | grep -qe '^-.*' ); then
-                    echo "loop (-l, --loop) requires one argument, got zero"
-                    exit 1
-                elif ( ! echo "${3:--x}" | grep -qe '^-.*' ); then
-                    echo "loop (-l, --loop) only takes one argument, got more than one"
-                    exit 1
-                fi
-
-                TASK_LOOP="$2"
-                shift 2
-                ;;
-
             -t | --type )
 
                 if ( echo "${2:--x}" | grep -qe '^-.*' ); then
@@ -372,7 +358,6 @@ add() {
     # # incorporate timing params into filename
     TASK_TIMING="${TASK_SCHEDULE:+s}${TASK_SCHEDULE}"
     TASK_TIMING="$TASK_TIMING${TASK_DUE:+d}${TASK_DUE}"
-    TASK_TIMING="$TASK_TIMING${TASK_LOOP:+l}${TASK_LOOP}"
 
     if [ "${TASK_TIMING:-}" = '' ]; then
         TASK_FILENAME="$TASK_FILENAME.n"
