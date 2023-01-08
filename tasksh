@@ -309,22 +309,6 @@ add() {
                 shift
                 ;;
 
-            -p | --parent )
-
-                if ( ! echo "${3:--x}" | grep -qe '^-.*' ); then
-                    echo "parent (-p, --parent) takes at most one argument, got more than one"
-                    exit 1
-                fi
-
-                if ( echo "${2:--x}" | grep -qe '^-.*' ); then
-                    OPEN_PARENT_SELECTOR=true
-                    shift
-                else
-                    PARENT_ID=$2
-                    shift 2
-                fi
-                ;;
-
             -h | --help)
                 help add
                 ;;
