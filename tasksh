@@ -218,8 +218,8 @@ configure
 add() {
     shift # shift over mode
 
-    SHORT=h # TODO implemented options
-    LONG=help
+    SHORT=d:s:l:t:c:ep:h 
+    LONG=due:,schedule:,loop:,type:,desc:,editor,parent:,help
 
     OPTS=$(getopt -n "$NAME" -o $SHORT -l $LONG -- "$@")
     if [ $? -ne -0 ]; then
@@ -233,7 +233,42 @@ add() {
     eval set -- "$OPTS"
 
     while :; do
-        case "$1" in # TODO implemented options
+        case "$1" in 
+
+        -d | --due )  # TODO
+            echo due placeholder
+            echo $2
+            shift 2
+            ;;
+
+        -s | --schedule ) # TODO
+            echo schedule placeholder
+            shift
+            ;;
+
+        -l | --loop ) # TODO
+            echo loop placeholder
+            shift
+            ;;
+
+        -t | --type ) # TODO
+            echo "type placeholder"
+            ;;
+
+        -c | --desc ) # TODO
+            echo description placeholder
+            shift
+            ;;
+
+        -e | --editor ) # TODO
+            echo open editor placeholder
+            shift
+            ;;
+
+        -p | --parent ) # TODO
+            echo parent placeholder
+            shift
+            ;;
 
         -h | --help)
             help add
