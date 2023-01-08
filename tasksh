@@ -216,6 +216,196 @@ add() {
     done
 }
 
+agenda() {
+    shift 
+
+    SHORT=h # TODO implemented options
+    LONG=help
+
+    OPTS=$(getopt -n "$NAME" -o $SHORT -l $LONG -- "$@")
+    if [ $? -ne -0 ]; then
+        exit 1
+    fi
+
+    if [ "$#" -eq 0 ]; then
+        help agenda
+    fi
+
+    eval set -- "$OPTS"
+
+    while :; do
+        case "$1" in # TODO implemented options
+
+        -h | --help)
+            help agenda
+            ;;
+
+        --)
+            shift
+            break
+            ;;
+
+        *)
+            echo "ERROR: Invalid option, see help (-h, --help)" 
+            exit 1   
+            ;;
+
+        esac
+    done
+}
+
+config() {
+    shift 
+
+    SHORT=h # TODO implemented options
+    LONG=help
+
+    OPTS=$(getopt -n "$NAME" -o $SHORT -l $LONG -- "$@")
+    if [ $? -ne -0 ]; then
+        exit 1
+    fi
+
+    if [ "$#" -eq 0 ]; then
+        help config
+    fi
+
+    eval set -- "$OPTS"
+
+    while :; do
+        case "$1" in # TODO implemented options
+
+        -h | --help)
+            help config
+            ;;
+
+        --)
+            shift
+            break
+            ;;
+
+        *)
+            echo "ERROR: Invalid option, see help (-h, --help)" 
+            exit 1   
+            ;;
+
+        esac
+    done
+}
+
+edit() {
+    shift 
+
+    SHORT=h # TODO implemented options
+    LONG=help
+
+    OPTS=$(getopt -n "$NAME" -o $SHORT -l $LONG -- "$@")
+    if [ $? -ne -0 ]; then
+        exit 1
+    fi
+
+    if [ "$#" -eq 0 ]; then
+        help edit
+    fi
+
+    eval set -- "$OPTS"
+
+    while :; do
+        case "$1" in # TODO implemented options
+
+        -h | --help)
+            help edit
+            ;;
+
+        --)
+            shift
+            break
+            ;;
+
+        *)
+            echo "ERROR: Invalid option, see help (-h, --help)" 
+            exit 1   
+            ;;
+
+        esac
+    done
+}
+
+list() {
+    shift 
+
+    SHORT=h # TODO implemented options
+    LONG=help
+
+    OPTS=$(getopt -n "$NAME" -o $SHORT -l $LONG -- "$@")
+    if [ $? -ne -0 ]; then
+        exit 1
+    fi
+
+    if [ "$#" -eq 0 ]; then
+        help list
+    fi
+
+    eval set -- "$OPTS"
+
+    while :; do
+        case "$1" in # TODO implemented options
+
+        -h | --help)
+            help list
+            ;;
+
+        --)
+            shift
+            break
+            ;;
+
+        *)
+            echo "ERROR: Invalid option, see help (-h, --help)" 
+            exit 1   
+            ;;
+
+        esac
+    done
+}
+
+view() {
+    shift 
+
+    SHORT=h # TODO implemented options
+    LONG=help
+
+    OPTS=$(getopt -n "$NAME" -o $SHORT -l $LONG -- "$@")
+    if [ $? -ne -0 ]; then
+        exit 1
+    fi
+
+    if [ "$#" -eq 0 ]; then
+        help view
+    fi
+
+    eval set -- "$OPTS"
+
+    while :; do
+        case "$1" in # TODO implemented options
+
+        -h | --help)
+            help view
+            ;;
+
+        --)
+            shift
+            break
+            ;;
+
+        *)
+            echo "ERROR: Invalid option, see help (-h, --help)" 
+            exit 1   
+            ;;
+
+        esac
+    done
+}
+
 
 # PARSE CLI
 if [ "$#" -eq 0 ]; then
@@ -226,28 +416,28 @@ fi
 ## Parse Modes
 case "$1" in
 
-    a | add ) # TODO
+    a | add ) 
         add "$@"
         ;;
     
     ag | agenda )
-        echo TODO agenda
+        agenda "$@"
         ;;
 
     c | config )
-        echo TODO config
+        config "$@"
         ;;
 
     e | edit )
-        echo TODO edit
+        edit "$@"
         ;;
 
     l | list )
-        echo TODO list
+        list "$@"
         ;;
 
     v | view )
-        echo TODO view
+        view "$@"
         ;;
 
     -h | --help )
