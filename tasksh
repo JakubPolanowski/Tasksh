@@ -223,7 +223,7 @@ add() {
 
         case "$1" in
 
-            -d | --due )
+            -d | --due ) # TODO input validation and conversion to standard DATETIME value
 
                 if ( echo "${2:--x}" | grep -qe '^-.*' ); then
                     echo "due (-d, --due) requires one argument, got zero"
@@ -237,7 +237,7 @@ add() {
                 shift 2
                 ;;
 
-            -s | --schedule )
+            -s | --schedule ) # TODO input validation and conversion to standard DATETIME value
 
                 if ( echo "${2:--x}" | grep -qe '^-.*' ); then
                     echo "schedule (-s, --schedule) requires one argument, got zero"
@@ -251,7 +251,7 @@ add() {
                 shift 2
                 ;;
 
-            -l | --loop )
+            -l | --loop ) # TODO input validation and standard loop format
 
                 if ( echo "${2:--x}" | grep -qe '^-.*' ); then
                     echo "loop (-l, --loop) requires one argument, got zero"
@@ -342,12 +342,27 @@ add() {
 
     # TODO determine ID (check folder than increment highest by one)
 
-    # incorporate timing params into filename
-    TASK_TIMING="$TASK_FILENAME.${TASK_SCHEDULE:+s}${TASK_SCHEDULE}"
-    TASK_TIMING="$TASK_TIMING${TASK_TIMING:+_}${TASK_DUE:+d}${TASK_DUE}"
-    TASK_TIMING="$TASK_TIMING${TASK_TIMING:+_}${TASK_LOOP:+d}${TASK_LOOP}"
+    # look in folder, get highest id and increment
+    if [ "$(ls -A "$TASKSH_DIR")" ]; then
+        echo NON EMPTY DIR LOCGIC NOT YET IMPLEMENTED
+        exit 1 # TODO
+    else # if folder is empty, start with ID = 1
+        TASK_ID=1
+    fi
 
-    TASK_FILENAME="$TASK_FILENAME.${TASK_TIMING-n}"
+    # incoporate task id into filename
+    TASK_FILENAME="$TASK_ID"
+
+    # # incorporate timing params into filename
+    TASK_TIMING="${TASK_SCHEDULE:+s}${TASK_SCHEDULE}"
+    TASK_TIMING="$TASK_TIMING${TASK_DUE:+d}${TASK_DUE}"
+    TASK_TIMING="$TASK_TIMING${TASK_LOOP:+l}${TASK_LOOP}"
+
+    if [ "${TASK_TIMING:-}" = '' ]; then
+        TASK_FILENAME="$TASK_FILENAME.n"
+    else
+        TASK_FILENAME="$TASK_FILENAME.$TASK_TIMING"
+    fi
 
     # incorporate type into filename
     TASK_FILENAME="$TASK_FILENAME.${TASK_TYPE-TODO}"
@@ -359,7 +374,16 @@ add() {
         exit 1
     fi
 
-    # TODO handle ADD logic
+    # make full path
+    TASK_PATH="$TASKSH_DIR/$TASK_FILENAME"
+
+    # create file
+    echo "$TASK_DESC" > "$TASK_PATH"
+
+    # open file with EDITOR if specified
+    if [ "$OPEN_EDITOR" = true ]; then
+        $EDITOR "$TASK_PATH"
+    fi
 }
 
 agenda() {
