@@ -356,6 +356,18 @@ add() {
 
     done
 
+    # TODO determine ID (check folder than increment highest by one)
+
+    # incorporate timing params into filename
+    TASK_TIMING="$TASK_FILENAME.${TASK_SCHEDULE:+s}${TASK_SCHEDULE}"
+    TASK_TIMING="$TASK_TIMING${TASK_TIMING:+_}${TASK_DUE:+d}${TASK_DUE}"
+    TASK_TIMING="$TASK_TIMING${TASK_TIMING:+_}${TASK_LOOP:+d}${TASK_LOOP}"
+
+    TASK_FILENAME="$TASK_FILENAME.${TASK_TIMING-n}"
+
+    # incorporate type into filename
+    TASK_FILENAME="$TASK_FILENAME.${TASK_TYPE-TODO}"
+
     # TODO handle ADD logic
 }
 
