@@ -57,7 +57,8 @@ help() {
         ;;
 
         add )
-            echo "Usage: $NAME add [OPTIONS]... [DESCRIPTION]"
+            echo "Usage: $NAME add [TITLE] [OPTIONS]... "
+            echo "Usage: $NAME add [OPTIONS]... -- [TITLE] "
             echo "Add a task."
             echo 
             # TODO add remaining docs
@@ -218,80 +219,144 @@ configure
 add() {
     shift # shift over mode
 
-    SHORT=d:s:l:t:c:ea:ph 
-    LONG=due:,schedule:,loop:,type:,desc:,editor,assign_parent:,parent_selector,help
+    while [ "$#" -gt 0 ]; do
 
-    OPTS=$(getopt -n "$NAME" -o $SHORT -l $LONG -- "$@")
-    if [ $? -ne -0 ]; then
-        exit 1
-    fi
+        case "$1" in
 
-    if [ "$#" -eq 0 ]; then
-        help add
-    fi
+            -d | --due )
 
-    eval set -- "$OPTS"
+                if ( echo "${2:--x}" | grep -qe '^-.*' ); then
+                    echo "due (-d, --due) requires one argument, got zero"
+                    exit 1
+                elif ( ! echo "${3:--x}" | grep -qe '^-.*' ); then
+                    echo "due (-d, --due) only takes one argument, got more than one"
+                    exit 1
+                fi
+                
+                TASK_DUE="$2"
+                shift 2
+                ;;
 
-    while :; do
-        case "$1" in 
+            -s | --schedule )
 
-        -d | --due )  # TODO
-            echo due placeholder
-            echo $2
-            shift 2
-            ;;
+                if ( echo "${2:--x}" | grep -qe '^-.*' ); then
+                    echo "schedule (-s, --schedule) requires one argument, got zero"
+                    exit 1
+                elif ( ! echo "${3:--x}" | grep -qe '^-.*' ); then
+                    echo "schedule (-s, --schedule) only takes one argument, got more than one"
+                    exit 1
+                fi
+                
+                TASK_SCHEDULE="$2"            
+                shift 2
+                ;;
 
-        -s | --schedule ) # TODO
-            echo schedule placeholder
-            shift 2
-            ;;
+            -l | --loop )
 
-        -l | --loop ) # TODO
-            echo loop placeholder
-            echo $2
-            shift 2
-            ;;
+                if ( echo "${2:--x}" | grep -qe '^-.*' ); then
+                    echo "loop (-l, --loop) requires one argument, got zero"
+                    exit 1
+                elif ( ! echo "${3:--x}" | grep -qe '^-.*' ); then
+                    echo "loop (-l, --loop) only takes one argument, got more than one"
+                    exit 1
+                fi
 
-        -t | --type ) # TODO
-            echo "type placeholder"
-            ;;
+                TASK_LOOP="$2"
+                shift 2
+                ;;
 
-        -c | --desc ) # TODO
-            echo description placeholder
-            shift 2
-            ;;
+            -t | --type )
 
-        -e | --editor ) # TODO
-            echo open editor placeholder
-            shift
-            ;;
+                if ( echo "${2:--x}" | grep -qe '^-.*' ); then
+                    echo "type (-t, --type) requires one argument, got zero"
+                    exit 1
+                elif ( ! echo "${3:--x}" | grep -qe '^-.*' ); then
+                    echo "type (-t, --type) only takes one argument, got more than one"
+                    exit 1
+                fi
 
-        -a | --assign_parent ) # TODO
-            echo assign_parent placeholder
-            shift 2
-            ;;
+                TASK_TYPE="$2"
+                ;;
 
-        -p | --parent_selector ) # TODO
-            echo parent_selector selector
-            shift
-            ;;
+            -c | --desc | --description )
 
-        -h | --help)
-            help add
-            ;;
+                if ( echo "${2:--x}" | grep -qe '^-.*' ); then
+                    echo "description (-c, --desc, --description) requires one or more arguments"
+                    exit 1
+                fi
 
-        --)
-            shift
-            break
-            ;;
+                TASK_DESC="$2"
+                shift 2
 
-        *)
-            echo "ERROR: Invalid option, see help (-h, --help)" 
-            exit 1   
-            ;;
+                while [ "$#" -gt 0 ]; do
+                    if ( echo "${1:--x}" | grep -qe '^-.*' ); then
+                        break
+                    else
+                        TASK_DESC="$TASK_DESC $1"
+                        shift
+                    fi
+                done                
+                ;;
 
-        esac
+            -ed | --editor )
+
+                if ( ! echo "${2:--x}" | grep -qe '^-.*' ); then
+                    echo "editor (-ed, --editor) takes no arguments, got more than zero"
+                    exit 1
+                fi
+
+                OPEN_EDITOR=true
+                shift
+                ;;
+
+            -p | --parent )
+
+                if ( ! echo "${3:--x}" | grep -qe '^-.*' ); then
+                    echo "parent (-p, --parent) takes at most one argument, got more than one"
+                    exit 1
+                fi
+
+                if ( echo "${2:--x}" | grep -qe '^-.*' ); then
+                    OPEN_PARENT_SELECTOR=true
+                    shift
+                else
+                    PARENT_ID=$2
+                    shift 2
+                fi
+                ;;
+
+            -h | --help)
+                help add
+                ;;
+
+            -- )
+                shift 
+
+                if [ "$#" -eq 0 ] && [ -z ${TASKSH_DIR+x} ]; then
+                    echo 'No task title set, a task title is required!'
+                    exit 1
+                fi
+
+                while [ "$#" -gt 0 ]; do
+                    TASK_TITLE="$TASK_TITLE $1"
+                    shift
+                done
+                ;;
+
+            * )
+                if ( echo "${1:--x}" | grep -qe '^-.*' ); then
+                    echo "$1 is an invalid options, see help (-h, --help) for available options"
+                    exit 1
+                else
+                    TASK_TITLE="$TASK_TITLE $1"
+                    shift
+                fi
+                ;;
+        esac 
+
     done
+
+    # TODO handle ADD logic
 }
 
 agenda() {
