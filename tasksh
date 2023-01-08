@@ -27,7 +27,19 @@ help() {
     case "$WHICH" in
 
         general )
-            echo general TODO
+            echo "Usage: $NAME [mode] [OPTIONS]..."
+            echo "Manage (add, edit, view, etc.) tasks."
+            echo 
+            echo "$NAME has 6 modes, (a)dd, (ag)enda, (c)onfig, (e)dit, (l)ist, and (v)iew"
+            echo "each mode has different functionality, to see usage for use:"
+            echo "  $NAME [mode] -h"
+            echo "  or"
+            echo "  $NAME [mode] --help"
+            echo
+            echo "For example:"
+            echo "  $NAME add -h"
+            echo "  or for using the add shorthand"
+            echo "  $NAME a -h"
         ;;
 
         add )
@@ -164,27 +176,59 @@ if [ "$#" -eq 0 ]; then
     default
 fi
 
-eval set -- "$OPTS"
+# Parse Modes
+case "$1" in
 
-while :; do
-    case "$1" in 
-
-    -h | --help)
-        help
+    a | add )
+        echo TODO add
+        ;;
+    
+    ag | agenda )
+        echo TODO agenda
         ;;
 
-    --)
-        shift
-        break
+    c | config )
+        echo TODO config
         ;;
 
-    *)
-        echo "Unexpected option: $1"
-        default
+    e | edit )
+        echo TODO edit
         ;;
 
-    esac
-done
+    l | list )
+        echo TODO list
+        ;;
 
-# run
+    v | view )
+        echo TODO view
+        ;;
+
+    * )
+        echo "ERROR: Invalid mode, see --help (-h)" 
+        exit 1       
+esac
+
+# eval set -- "$OPTS"
+
+# while :; do
+#     case "$1" in 
+
+#     -h | --help)
+#         help
+#         ;;
+
+#     --)
+#         shift
+#         break
+#         ;;
+
+#     *)
+#         echo "Unexpected option: $1"
+#         default
+#         ;;
+
+#     esac
+# done
+
+# # run
 
