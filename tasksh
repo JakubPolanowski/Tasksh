@@ -49,6 +49,10 @@ help() {
         list )
             echo list TODO
         ;;
+
+        view )
+            echo view TODO
+        ;;
         
         * )
             echo "Unknown help section, ERROR"
