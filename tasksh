@@ -19,10 +19,42 @@ fi
 
 # functions
 
+# shellcheck disable=SC2120
 help() {
 
-    # TODO
-    echo TODO
+    WHICH=${1:-general}
+
+    case "$WHICH" in
+
+        general )
+            echo general TODO
+        ;;
+
+        add )
+            echo add TODO
+        ;;
+
+        agenda )
+            echo agenda TODO
+        ;;
+
+        config ) 
+            echo config TODO
+        ;;
+
+        edit )
+            echo edit TODO
+        ;;
+
+        list )
+            echo list TODO
+        ;;
+        
+        * )
+            echo "Unknown help section, ERROR"
+            exit 1
+    esac
+
     exit 0
 }
 
