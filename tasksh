@@ -243,12 +243,12 @@ add() {
 
         -s | --schedule ) # TODO
             echo schedule placeholder
-            shift
+            shift 2
             ;;
 
         -l | --loop ) # TODO
             echo loop placeholder
-            shift
+            shift 2
             ;;
 
         -t | --type ) # TODO
@@ -257,7 +257,7 @@ add() {
 
         -c | --desc ) # TODO
             echo description placeholder
-            shift
+            shift 2
             ;;
 
         -e | --editor ) # TODO
@@ -267,7 +267,7 @@ add() {
 
         -p | --parent ) # TODO
             echo parent placeholder
-            shift
+            shift 2
             ;;
 
         -h | --help)
