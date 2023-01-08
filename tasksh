@@ -28,8 +28,9 @@ help() {
             echo "Usage: $NAME [mode] [OPTIONS]..."
             echo "Manage (add, edit, view, etc.) tasks."
             echo 
-            echo "$NAME has 6 modes, (a)dd, (ag)enda, (c)onfig, (e)dit, (l)ist, and (v)iew"
-            echo "each mode has different functionality, to see usage for use:"
+            echo "$NAME has 8 modes, (a)dd, (ag)enda, (c)onfig, (d)one, (e)dit, (l)ist,"
+            echo "(r)emove, and (v)iew."
+            echo "Each mode has different functionality, to see usage for use:"
             echo "  $NAME [mode] -h"
             echo "  or"
             echo "  $NAME [mode] --help"
@@ -39,7 +40,7 @@ help() {
             echo "  or for using the add shorthand"
             echo "  $NAME a -h"
             echo
-            echo "There is technically a 7th 'no-mode' mode with two options:"
+            echo "There is technically a 9th 'no-mode' mode with two options:"
             echo
             echo "Help:"
             echo "  This gets the general help message for $NAME"
@@ -76,6 +77,14 @@ help() {
             # TODO add remaining docs
         ;;
 
+        mark_done )
+            echo "Usage:     $NAME done [TASK_ID] [OPTIONS]..."
+            echo "Alternate: $NAME done [OPTIONS]..."
+            echo "Mark a task as done."
+            echo 
+            # TODO add remaining docs
+        ;; 
+
         edit )
             echo "Usage:     $NAME edit [TASK_ID] [OPTIONS]..."
             echo "Alternate: $NAME edit [OPTIONS]..."
@@ -87,6 +96,14 @@ help() {
         list )
             echo "Usage: $NAME list [OPTIONS]..."
             echo "List tasks."
+            echo 
+            # TODO add remaining docs
+        ;;
+
+        remove )
+            echo "Usage:     $NAME remove [TASK_ID] [OPTIONS]..."
+            echo "Alternate: $NAME remove [OPTIONS]..."
+            echo "Removes a task"
             echo 
             # TODO add remaining docs
         ;;
@@ -312,6 +329,44 @@ config() {
     done
 }
 
+mark_done() {
+    shift 
+
+    SHORT=h # TODO implemented options
+    LONG=help
+
+    OPTS=$(getopt -n "$NAME" -o $SHORT -l $LONG -- "$@")
+    if [ $? -ne -0 ]; then
+        exit 1
+    fi
+
+    if [ "$#" -eq 0 ]; then
+        help mark_done
+    fi
+
+    eval set -- "$OPTS"
+
+    while :; do
+        case "$1" in # TODO implemented options
+
+        -h | --help)
+            help mark_done
+            ;;
+
+        --)
+            shift
+            break
+            ;;
+
+        *)
+            echo "ERROR: Invalid option, see help (-h, --help)" 
+            exit 1   
+            ;;
+
+        esac
+    done
+}
+
 edit() {
     shift 
 
@@ -388,6 +443,44 @@ list() {
     done
 }
 
+remove() {
+    shift 
+
+    SHORT=h # TODO implemented options
+    LONG=help
+
+    OPTS=$(getopt -n "$NAME" -o $SHORT -l $LONG -- "$@")
+    if [ $? -ne -0 ]; then
+        exit 1
+    fi
+
+    if [ "$#" -eq 0 ]; then
+        help remove
+    fi
+
+    eval set -- "$OPTS"
+
+    while :; do
+        case "$1" in # TODO implemented options
+
+        -h | --help)
+            help remove
+            ;;
+
+        --)
+            shift
+            break
+            ;;
+
+        *)
+            echo "ERROR: Invalid option, see help (-h, --help)" 
+            exit 1   
+            ;;
+
+        esac
+    done
+}
+
 view() {
     shift 
 
@@ -426,7 +519,6 @@ view() {
     done
 }
 
-
 # PARSE CLI
 if [ "$#" -eq 0 ]; then
     default
@@ -448,12 +540,20 @@ case "$1" in
         config "$@"
         ;;
 
+    d | done )
+        mark_done "$@"
+        ;;
+
     e | edit )
         edit "$@"
         ;;
 
     l | list )
         list "$@"
+        ;;
+    
+    r | remove )
+        remove "$@"
         ;;
 
     v | view )
