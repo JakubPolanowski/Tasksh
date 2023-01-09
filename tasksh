@@ -671,9 +671,10 @@ view() {
         exit 1
     fi
 
-    set -- "$(basename "$i" | sed -n 's/^\([0-9][0-9]*\)\.\([a-z][a-z0-9]*\)\.\([A-Za-z0-9][A-Za-z0-9]*\)\.\([A-Z][A-Z]*\)$/\2 \3 \4/p')"
+    set -- "$(basename "$TASK_PATH" | sed -n 's/^\([0-9][0-9]*\)\.\([a-z][a-z0-9]*\)\.\([A-Za-z0-9][A-Za-z0-9]*\)\.\([A-Z][A-Z]*\)$/\2 \3 \4/p')"
 
-    TASK_TIMING=$1 # TODO PARSE
+    TASK_SCHEDULED=$(echo "$1" | sed -n 's/.*s\([0-9][0-9]*\).*/\1/p')
+    TASK_DUE=$(echo "$1" | sed -n 's/.*d\([0-9][0-9]*\).*/\1/p')
     TASK_TYPE=$2
     TASK_STATUS=$3
 
@@ -683,7 +684,22 @@ view() {
     # echo details
     echo "TITLE      : $TASK_TITLE"
     echo "STATUS     : $TASK_STATUS"
-    # TODO added scheduled and due in applicable
+
+    # added scheduled and due if applicable
+    if [ -n "$TASK_SCHEDULED" ]; then
+        if ! TASK_SCHEDULED_PARSED=$(echo "$TASK_SCHEDULED" | date); then
+            TASK_SCHEDULED_PARSED="FAILED TO PARSE ($TASK_SCHEDULED)"
+        fi
+    echo "SCHEDULED  : $TASK_SCHEDULED_PARSED"
+    fi
+
+    if [ -n "$TASK_DUE" ]; then
+        if ! TASK_DUE_PARSED=$(echo "$TASK_DUE" | date); then
+            TASK_DUE_PARSED="FAILED TO PARSE ($TASK_DUE)"
+        fi
+    echo "DUE        : $TASK_DUE_PARSED"
+    fi
+    
     echo "DESCRIPTION: $TASK_DESC"
     echo
     echo "TASK_FILE  : $TASK_PATH"
@@ -693,7 +709,6 @@ view() {
 if [ "$#" -eq 0 ]; then
     default
 fi
-
 
 ## Parse Modes
 case "$1" in
