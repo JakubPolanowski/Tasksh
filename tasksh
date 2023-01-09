@@ -698,7 +698,11 @@ view() {
         if ! TASK_DUE_PARSED=$(echo "$TASK_DUE" | date); then
             TASK_DUE_PARSED="FAILED TO PARSE ($TASK_DUE)"
         fi
-    echo "DUE        : $TASK_DUE_PARSED"
+        # check overview
+        if [ "$(date +%s)" -gt "$TASK_DUE" ]; then
+            TASK_OVERDUE=y
+        fi
+    echo "DUE        : $TASK_DUE_PARSED ${TASK_OVERDUE:+[OVERDUE!]}"
     fi
     
     echo "DESCRIPTION: $TASK_DESC"
