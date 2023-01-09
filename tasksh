@@ -683,6 +683,7 @@ view() {
 
     # echo details
     echo "TITLE      : $TASK_TITLE"
+    echo "ID         : $TASK_ID" 
     echo "STATUS     : $TASK_STATUS"
 
     # added scheduled and due if applicable
