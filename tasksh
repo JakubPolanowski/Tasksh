@@ -640,39 +640,38 @@ remove() {
 view() {
     shift 
 
-    SHORT=h # TODO implemented options
-    LONG=help
+    # accepts either task_ID or -h/--help
 
-    OPTS=$(getopt -n "$NAME" -o $SHORT -l $LONG -- "$@")
-    if [ $? -ne -0 ]; then
-        exit 1
-    fi
-
-    if [ "$#" -eq 0 ]; then
-        help view
-    fi
-
-    eval set -- "$OPTS"
-
-    while :; do
-        case "$1" in # TODO implemented options
+    case "$1" in
 
         -h | --help)
             help view
             ;;
 
-        --)
-            shift
-            break
+        * )
+            if ( echo "$1" | grep -qe "^[0-9][0-9]*$" ); then
+                TASK_ID=$1
+            else
+                echo "Invalid option, see help (-h | --help)"
+                exit 1
+            fi
             ;;
+    esac
 
-        *)
-            echo "ERROR: Invalid option, see help (-h, --help)" 
-            exit 1   
-            ;;
+    for i in "$TASKSH_DIR"/*; do
+        CURRENT_ID=$(basename "$i" | sed -n 's/^\([0-9][0-9]*\)\.\([a-z][a-z0-9]*\)\.\([A-Za-z0-9][A-Za-z0-9]*\)\.\([A-Z][A-Z]*\)$/\1/p')
 
-        esac
+        if [ "$CURRENT_ID" -eq "$TASK_ID" ]; then
+            TASK_PATH="$i"
+        fi
     done
+
+    if [ -z ${TASK_PATH+x} ]; then
+        echo "No task with ID $TASK_ID found."
+        exit 1
+    fi
+
+    echo $TASK_PATH
 }
 
 # PARSE CLI
