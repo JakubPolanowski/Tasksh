@@ -61,7 +61,17 @@ help() {
             echo "Usage: $NAME add [OPTIONS]... -- [TITLE] "
             echo "Add a task."
             echo 
-            # TODO add remaining docs
+            echo "Options:"
+            echo "  -d | --due                  : Set the the due date of the task"
+            echo "  -s | --schedule             : Schedule the task to be started on the specified date/time"
+            echo "  -t | --type                 : Sets the task type, for example TODO, PROJ, etc. There is no restriction on what the type can be set to, aside from it having to a single word (no spaces)"
+            echo "  -c | --desc | --description : Sets the description of the task"
+            echo "  -ed | --editor              : Opens a terminal editor (whatever \$EDITOR is set to) for the task file (this is the description)"
+            echo "  -h | --help                 : Prints help information"
+            echo
+            echo "Examples:" 
+            echo "  $NAME add This is my Note Title -d 12/12/2022 -t CUSTOM"
+            echo "  $NAME add -s 1/30/2023 -- Another note title"
         ;;
 
         agenda )
@@ -315,7 +325,7 @@ add() {
                 fi
 
                 while [ "$#" -gt 0 ]; do
-                    TASK_TITLE="$TASK_TITLE $1"
+                    TASK_TITLE="$TASK_TITLE${TASK_TITLE:+ }$1"
                     shift
                 done
                 ;;
@@ -325,7 +335,7 @@ add() {
                     echo "$1 is an invalid options, see help (-h, --help) for available options"
                     exit 1
                 else
-                    TASK_TITLE="$TASK_TITLE $1"
+                    TASK_TITLE="$TASK_TITLE${TASK_TITLE:+ }$1"
                     shift
                 fi
                 ;;
@@ -384,7 +394,14 @@ add() {
     fi
 
     # create file
-    echo "$TASK_DESC" > "$TASK_PATH"
+    if ! echo "TASK_TITLE=\"$TASK_TITLE\"" > "$TASK_PATH"; then
+        echo "ERROR: Failed to write task to file"
+        exit 1
+    fi
+    if ! echo "TASK_DESC=\"$TASK_DESC\"" >> "$TASK_PATH"; then
+        echo "ERROR: Failed to append task description to file"
+        exit 1
+    fi
 
     # open file with EDITOR if specified
     if [ "$OPEN_EDITOR" = true ]; then
