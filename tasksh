@@ -333,17 +333,19 @@ add() {
 
     done
 
-    # sed -n 's/^\([0-9][0-9]*\)\.\([a-z][a-z0-9]*\)\.\([A-Za-z0-9][A-Za-z0-9]*\)$/\1 \2 \3/p'
+    # sed -n sed -n 's/^\([0-9][0-9]*\)\.\([a-z][a-z0-9]*\)\.\([A-Za-z0-9][A-Za-z0-9]*\)\.\([A-Z][A-Z]*\)$/\1 \2 \3 \4/p' 
+
     # \1 -> ID
     # \2 -> timing info
     # \3 -> task type
+    # \4 -> status
 
     # start ID
     TASK_ID=1
 
     # look in folder, get highest id and increment
     for i in "$TASKSH_DIR"/*; do
-        CURRENT_ID=$(basename "$i" | sed -n 's/^\([0-9][0-9]*\)\.\([a-z][a-z0-9]*\)\.\([A-Za-z0-9][A-Za-z0-9]*\)$/\1/p')
+        CURRENT_ID=$(basename "$i" | sed -n 's/^\([0-9][0-9]*\)\.\([a-z][a-z0-9]*\)\.\([A-Za-z0-9][A-Za-z0-9]*\)\.\([A-Z][A-Z]*\)$/\1/p')
 
         : "${CURRENT_ID:=0}"
 
@@ -367,6 +369,9 @@ add() {
 
     # incorporate type into filename
     TASK_FILENAME="$TASK_FILENAME.${TASK_TYPE-TODO}"
+
+    # add default status
+    TASK_FILENAME="$TASK_FILENAME.ACTIVE"
 
     # make full path
     TASK_PATH="$TASKSH_DIR/$TASK_FILENAME"
