@@ -632,7 +632,7 @@ edit() {
                 
                 case $1 in
                     '' )
-                        echo 'A task ID is required'
+                        echo "A task ID is required"
                         exit 1
                         ;;
 
@@ -646,13 +646,24 @@ edit() {
                         exit 1
                         ;;
                     * ) 
-                        TASK_ID=$2
+                        TASK_ID=$1
                         shift
                         ;;
                 esac
                 ;;
         esac 
     done
+
+    # the id.*.*.* is because in the task file format, there are 3 dots seperating id, scheduling, type, and status
+    if ! match=$(ls "$TASKSH_DIR/$TASK_ID".*.*.* -R 2>/dev/null); then
+        echo "No task with ID $TASK_ID found"
+        exit 1
+    fi
+
+    if [ "$(echo "$match" | wc -l)" -gt 1 ]; then
+        echo "Multiple matches found, this is likely do manually modification of tasksh folder ($TASKSH_DIR). This requires a manually fix, inside the tasksh folder, change the file names such that no tasks share the same id (file name format is ID.SCHEDULING.TYPE.STATUS"
+        exit 1
+    fi
 
     # TODO implement edit logic
 }
@@ -733,7 +744,7 @@ remove() {
     done
 }
 
-view() { # TODO add editor open option
+view() { # TODO add editor open option, #TODO improve efficiency of implemenation
     shift 
 
     # accepts either task_ID or -h/--help
