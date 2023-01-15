@@ -861,12 +861,13 @@ view() { # TODO add editor open option, #TODO improve efficiency of implemenatio
         exit 1
     fi
 
-    set -- "$(basename "$TASK_PATH" | sed -n 's/^\([0-9][0-9]*\)\.\([a-z][a-z0-9]*\)\.\([A-Za-z0-9][A-Za-z0-9]*\)\.\([A-Z][A-Z]*\)$/\2 \3 \4/p')"
+    # parse filename
+    TASK_TIMING="$(basename "$TASK_PATH" | sed -n 's/^\([0-9][0-9]*\)\.\([a-z][a-z0-9]*\)\.\([A-Za-z0-9][A-Za-z0-9]*\)\.\([A-Z][A-Z]*\)$/\2/p')"
 
-    TASK_SCHEDULED=$(echo "$1" | sed -n 's/.*s\([0-9][0-9]*\).*/\1/p')
-    TASK_DUE=$(echo "$1" | sed -n 's/.*d\([0-9][0-9]*\).*/\1/p')
-    TASK_TYPE=$2
-    TASK_STATUS=$3
+    TASK_SCHEDULED=$(echo "$TASK_TIMING" | sed -n 's/.*s\([0-9][0-9]*\).*/\1/p')
+    TASK_DUE=$(echo "$TASK_TIMING" | sed -n 's/.*d\([0-9][0-9]*\).*/\1/p')
+    TASK_TYPE="$(basename "$TASK_PATH" | sed -n 's/^\([0-9][0-9]*\)\.\([a-z][a-z0-9]*\)\.\([A-Za-z0-9][A-Za-z0-9]*\)\.\([A-Z][A-Z]*\)$/\3/p')"
+    TASK_STATUS="$(basename "$TASK_PATH" | sed -n 's/^\([0-9][0-9]*\)\.\([a-z][a-z0-9]*\)\.\([A-Za-z0-9][A-Za-z0-9]*\)\.\([A-Z][A-Z]*\)$/\4/p')"
 
     # shellcheck disable=SC1090
     . "$TASK_PATH"
@@ -878,14 +879,14 @@ view() { # TODO add editor open option, #TODO improve efficiency of implemenatio
 
     # added scheduled and due if applicable
     if [ -n "$TASK_SCHEDULED" ]; then
-        if ! TASK_SCHEDULED_PARSED=$(echo "$TASK_SCHEDULED" | date); then
+        if ! TASK_SCHEDULED_PARSED=$(date -d "@$TASK_SCHEDULED"); then
             TASK_SCHEDULED_PARSED="FAILED TO PARSE ($TASK_SCHEDULED)"
         fi
     echo "SCHEDULED  : $TASK_SCHEDULED_PARSED"
     fi
 
     if [ -n "$TASK_DUE" ]; then
-        if ! TASK_DUE_PARSED=$(echo "$TASK_DUE" | date); then
+        if ! TASK_DUE_PARSED=$(date -d "@$TASK_DUE"); then
             TASK_DUE_PARSED="FAILED TO PARSE ($TASK_DUE)"
         fi
         # check overview
