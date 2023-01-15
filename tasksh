@@ -97,11 +97,21 @@ help() {
         ;; 
 
         edit )
-            echo "Usage:     $NAME edit [TASK_ID] [OPTIONS]..."
-            echo "Alternate: $NAME edit [OPTIONS]..."
-            echo "Edits an existing task."
+            echo "Usage: $NAME add [TASK_ID] [OPTIONS]... "
+            echo "Usage: $NAME add [OPTIONS]... -i [TASK_ID] "
+            echo "Edits a task."
             echo 
-            # TODO add remaining docs
+            echo "Options:"
+            echo "  -i | --id                   : Selects the task to edit based on id. Note that if task id is specified both ways (first param and via named param -i) then the last value id specified will be used to select the task"
+            echo "  -d | --due                  : Change the the due date of the task"
+            echo "  -s | --schedule             : Changes task scheduling (when the task is to be started)"
+            echo "  -t | --type                 : Changes the task type, for example TODO, PROJ, etc. There is no restriction on what the type can be set to, aside from it having to a single word (no spaces)"
+            echo "  -c | --desc | --description : Changes the description of the task"
+            echo "  -h | --help                 : Prints help information"
+            echo
+            echo "Examples:" 
+            echo "  $NAME edit 1 -d 12/12/2022 -t CUSTOM"
+            echo "  $NAME add -s 1/30/2023 -i 2"
         ;;
 
         list )
@@ -598,21 +608,6 @@ edit() {
                 done                
                 ;;
 
-            -ed | --editor )
-
-                if ( ! echo "${2:--x}" | grep -qe '^-.*' ); then
-                    echo "editor (-ed, --editor) takes no arguments, got more than zero"
-                    exit 1
-                fi
-
-                OPEN_EDITOR=true
-                shift
-                ;;
-
-            -h | --help)
-                help add
-                ;;
-
             -i | --id ) 
 
                 case $2 in
@@ -738,7 +733,7 @@ remove() {
     done
 }
 
-view() {
+view() { # TODO add editor open option
     shift 
 
     # accepts either task_ID or -h/--help
