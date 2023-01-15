@@ -827,7 +827,7 @@ remove() {
     done
 }
 
-view() { # TODO add editor open option, #TODO improve efficiency of implemenation
+view() { # TODO add editor open option
     shift 
 
     # accepts either task_ID or -h/--help
@@ -848,16 +848,15 @@ view() { # TODO add editor open option, #TODO improve efficiency of implemenatio
             ;;
     esac
 
-    for i in "$TASKSH_DIR"/*; do
-        CURRENT_ID=$(basename "$i" | sed -n 's/^\([0-9][0-9]*\)\.\([a-z][a-z0-9]*\)\.\([A-Za-z0-9][A-Za-z0-9]*\)\.\([A-Z][A-Z]*\)$/\1/p')
+    # the id.*.*.* is because in the task file format, there are 3 dots seperating id, scheduling, type, and status
+    if ! TASK_PATH=$(ls "$TASKSH_DIR/$TASK_ID".*.*.* -R 2>/dev/null); then
+        echo "No task with ID $TASK_ID found"
+        exit 1
+    fi
 
-        if [ "$CURRENT_ID" -eq "$TASK_ID" ]; then
-            TASK_PATH="$i"
-        fi
-    done
-
-    if [ -z ${TASK_PATH+x} ]; then
-        echo "No task with ID $TASK_ID found."
+    if [ "$(echo "$TASK_PATH" | wc -l)" -gt 1 ]; then
+        echo "Multiple matches found, this is likely do manually modification of tasksh folder ($TASKSH_DIR). This requires a manually fix, inside the tasksh folder, change the file names such that no tasks share the same id (file name format is ID.SCHEDULING.TYPE.STATUS."
+        echo "$TASK_PATH"
         exit 1
     fi
 
