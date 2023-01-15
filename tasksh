@@ -102,12 +102,13 @@ help() {
             echo "Edits a task."
             echo 
             echo "Options:"
-            echo "  -i | --id                   : Selects the task to edit based on id. Note that if task id is specified both ways (first param and via named param -i) then the last value id specified will be used to select the task"
-            echo "  -d | --due                  : Change the the due date of the task"
-            echo "  -s | --schedule             : Changes task scheduling (when the task is to be started)"
-            echo "  -t | --type                 : Changes the task type, for example TODO, PROJ, etc. There is no restriction on what the type can be set to, aside from it having to a single word (no spaces)"
-            echo "  -c | --desc | --description : Changes the description of the task"
-            echo "  -h | --help                 : Prints help information"
+            echo "  -i  | --id                   : Selects the task to edit based on id. Note that if task id is specified both ways (first param and via named param -i) then the last value id specified will be used to select the task"
+            echo "  -d  | --due                  : Change the the due date of the task"
+            echo "  -s  | --schedule             : Changes task scheduling (when the task is to be started)"
+            echo "  -t  | --type                 : Changes the task type, for example TODO, PROJ, etc. There is no restriction on what the type can be set to, aside from it having to a single word (no spaces)"
+            echo "  -ti | --title               : Changes the task title."
+            echo "  -c  | --desc | --description : Changes the description of the task"
+            echo "  -h  | --help                 : Prints help information"
             echo
             echo "Examples:" 
             echo "  $NAME edit 1 -d 12/12/2022 -t CUSTOM"
@@ -289,6 +290,7 @@ add() {
                 fi
 
                 TASK_TYPE="$2"
+                shift 2
                 ;;
 
             -c | --desc | --description )
@@ -586,6 +588,27 @@ edit() {
                 fi
 
                 TASK_TYPE="$2"
+                shift 2
+                ;;
+
+            -ti | --title )
+
+                if ( echo "${2:--x}" | grep -qe '^-.*' ); then
+                    echo "title (-i, --title) requires one or more arguments"
+                    exit 1
+                fi
+
+                NEW_TASK_TITLE="$2"
+                shift 2
+
+                while [ "$#" -gt 0 ]; do
+                    if ( echo "${1:--x}" | grep -qe '^-.*' ); then
+                        break
+                    else
+                        NEW_TASK_TITLE="$NEW_TASK_TITLE $1"
+                        shift
+                    fi
+                done                
                 ;;
 
             -c | --desc | --description )
@@ -595,14 +618,14 @@ edit() {
                     exit 1
                 fi
 
-                TASK_DESC="$2"
+                NEW_TASK_DESC="$2"
                 shift 2
 
                 while [ "$#" -gt 0 ]; do
                     if ( echo "${1:--x}" | grep -qe '^-.*' ); then
                         break
                     else
-                        TASK_DESC="$TASK_DESC $1"
+                        NEW_TASK_DESC="$NEW_TASK_DESC $1"
                         shift
                     fi
                 done                
@@ -655,17 +678,77 @@ edit() {
     done
 
     # the id.*.*.* is because in the task file format, there are 3 dots seperating id, scheduling, type, and status
-    if ! match=$(ls "$TASKSH_DIR/$TASK_ID".*.*.* -R 2>/dev/null); then
+    if ! TASK_PATH=$(ls "$TASKSH_DIR/$TASK_ID".*.*.* -R 2>/dev/null); then
         echo "No task with ID $TASK_ID found"
         exit 1
     fi
 
-    if [ "$(echo "$match" | wc -l)" -gt 1 ]; then
-        echo "Multiple matches found, this is likely do manually modification of tasksh folder ($TASKSH_DIR). This requires a manually fix, inside the tasksh folder, change the file names such that no tasks share the same id (file name format is ID.SCHEDULING.TYPE.STATUS"
+    if [ "$(echo "$TASK_PATH" | wc -l)" -gt 1 ]; then
+        echo "Multiple matches found, this is likely do manually modification of tasksh folder ($TASKSH_DIR). This requires a manually fix, inside the tasksh folder, change the file names such that no tasks share the same id (file name format is ID.SCHEDULING.TYPE.STATUS."
+        echo "$TASK_PATH"
         exit 1
     fi
 
-    # TODO implement edit logic
+    # parse filename
+    TASK_TIMING="$(basename "$TASK_PATH" | sed -n 's/^\([0-9][0-9]*\)\.\([a-z][a-z0-9]*\)\.\([A-Za-z0-9][A-Za-z0-9]*\)\.\([A-Z][A-Z]*\)$/\2/p')"
+
+    OLD_TASK_SCHEDULED=$(echo "$TASK_TIMING" | sed -n 's/.*s\([0-9][0-9]*\).*/\1/p')
+    OLD_TASK_DUE=$(echo "$TASK_TIMING" | sed -n 's/.*d\([0-9][0-9]*\).*/\1/p')
+    OLD_TASK_TYPE="$(basename "$TASK_PATH" | sed -n 's/^\([0-9][0-9]*\)\.\([a-z][a-z0-9]*\)\.\([A-Za-z0-9][A-Za-z0-9]*\)\.\([A-Z][A-Z]*\)$/\3/p')"
+    OLD_TASK_STATUS="$(basename "$TASK_PATH" | sed -n 's/^\([0-9][0-9]*\)\.\([a-z][a-z0-9]*\)\.\([A-Za-z0-9][A-Za-z0-9]*\)\.\([A-Z][A-Z]*\)$/\4/p')"
+
+    # created new filename
+    TASK_FILENAME="$TASK_ID"
+
+    # # incorporate timing params into filename
+    if [ -n "$OLD_TASK_SCHEDULED" ] || [ -n "$TASK_SCHEDULE" ]; then
+        TASK_TIMING_DESCRIPTOR="s${TASK_SCHEDULE:-$OLD_TASK_SCHEDULED}"
+    fi
+
+    if [ -n "$OLD_TASK_DUE" ] || [ -n "$TASK_DUE" ]; then
+        TASK_TIMING_DESCRIPTOR="${TASK_TIMING_DESCRIPTOR}d${TASK_DUE:-$OLD_TASK_DUE}"
+    fi
+
+    if [ "${TASK_TIMING_DESCRIPTOR:-}" = '' ]; then
+        TASK_FILENAME="$TASK_FILENAME.n"
+    else
+        TASK_FILENAME="$TASK_FILENAME.$TASK_TIMING_DESCRIPTOR"
+    fi
+
+    # incorporate type into filename
+    TASK_FILENAME="$TASK_FILENAME.${TASK_TYPE-$OLD_TASK_TYPE}"
+
+    # add default status
+    TASK_FILENAME="$TASK_FILENAME.$OLD_TASK_STATUS"
+
+    # make full path
+    NEW_TASK_PATH="$TASKSH_DIR/$TASK_FILENAME"
+
+    # rename if different
+    if [ "$TASK_PATH" != "$NEW_TASK_PATH" ]; then
+        if ! mv "$TASK_PATH" "$NEW_TASK_PATH"; then
+            echo "Failed to update task due to failure to rename task file ($TASK_PATH)"
+            echo "This is likely a permissions error. Ensure that the folder and file has read and write permissions"
+            exit 1
+        fi
+    fi
+
+    # load if either title or desc was edited
+    if [ -n "$NEW_TASK_TITLE" ] || [ -n "$NEW_TASK_DESC" ]; then
+        # shellcheck disable=SC1090
+        . "$NEW_TASK_PATH"
+
+        if ! echo "TASK_TITLE=\"${NEW_TASK_TITLE:-$TASK_TITLE}\"" > "$NEW_TASK_PATH"; then
+            echo "ERROR: Failed to write new title to file ($TASK_PATH)"
+            exit 1
+        fi
+        if ! echo "TASK_DESC=\"${NEW_TASK_DESC:-$TASK_DESC}\"" >> "$NEW_TASK_PATH"; then
+            echo "ERROR: Failed to append task description to file ($NEW_TASK_PATH)"
+            exit 1
+        fi
+
+    fi
+    
 }
 
 list() {
