@@ -526,39 +526,140 @@ mark_done() {
 edit() {
     shift 
 
-    SHORT=h # TODO implemented options
-    LONG=help
+    while [ "$#" -gt 0 ]; do
 
-    OPTS=$(getopt -n "$NAME" -o $SHORT -l $LONG -- "$@")
-    if [ $? -ne -0 ]; then
-        exit 1
-    fi
+        case "$1" in
 
-    if [ "$#" -eq 0 ]; then
-        help edit
-    fi
+            -d | --due ) 
+                if ( echo "${2:--x}" | grep -qe '^-.*' ); then
+                    echo "due (-d, --due) requires one argument, got zero"
+                    exit 1
+                elif ( ! echo "${3:--x}" | grep -qe '^-.*' ); then
+                    echo "due (-d, --due) only takes one argument, got more than one"
+                    exit 1
+                fi
 
-    eval set -- "$OPTS"
+                if ! TASK_DUE=$(date -d "$2" +%s); then
+                    echo "ERROR: Invalid date format, dates are parsed via the date command, see date --help for help"
+                    exit 1
+                fi
+                
+                shift 2
+                ;;
 
-    while :; do
-        case "$1" in # TODO implemented options
+            -s | --schedule ) 
 
-        -h | --help)
-            help edit
-            ;;
+                if ( echo "${2:--x}" | grep -qe '^-.*' ); then
+                    echo "schedule (-s, --schedule) requires one argument, got zero"
+                    exit 1
+                elif ( ! echo "${3:--x}" | grep -qe '^-.*' ); then
+                    echo "schedule (-s, --schedule) only takes one argument, got more than one"
+                    exit 1
+                fi
 
-        --)
-            shift
-            break
-            ;;
+                if ! TASK_SCHEDULE=$(date -d "$2" +%s); then
+                    echo "ERROR: Invalid date format, dates are parsed via the date command, see date --help for help"
+                    exit 1
+                fi
+                
+                shift 2
+                ;;
 
-        *)
-            echo "ERROR: Invalid option, see help (-h, --help)" 
-            exit 1   
-            ;;
+            -t | --type )
 
-        esac
+                if ( echo "${2:--x}" | grep -qe '^-.*' ); then
+                    echo "type (-t, --type) requires one argument, got zero"
+                    exit 1
+                elif ( ! echo "${3:--x}" | grep -qe '^-.*' ); then
+                    echo "type (-t, --type) only takes one argument, got more than one"
+                    exit 1
+                fi
+
+                TASK_TYPE="$2"
+                ;;
+
+            -c | --desc | --description )
+
+                if ( echo "${2:--x}" | grep -qe '^-.*' ); then
+                    echo "description (-c, --desc, --description) requires one or more arguments"
+                    exit 1
+                fi
+
+                TASK_DESC="$2"
+                shift 2
+
+                while [ "$#" -gt 0 ]; do
+                    if ( echo "${1:--x}" | grep -qe '^-.*' ); then
+                        break
+                    else
+                        TASK_DESC="$TASK_DESC $1"
+                        shift
+                    fi
+                done                
+                ;;
+
+            -ed | --editor )
+
+                if ( ! echo "${2:--x}" | grep -qe '^-.*' ); then
+                    echo "editor (-ed, --editor) takes no arguments, got more than zero"
+                    exit 1
+                fi
+
+                OPEN_EDITOR=true
+                shift
+                ;;
+
+            -h | --help)
+                help add
+                ;;
+
+            -i | --id ) 
+
+                case $2 in
+                    '' | -* )
+                        echo "id requires one argument, the task id, see help (-h, --help) for more information."
+                        exit 1
+                        ;;
+                    
+                    *[!0-9]* ) 
+                        echo "task id is always an intenger, please specify a valid task id."
+                        exit 1
+                        ;;
+                    * ) 
+                        TASK_ID=$2
+                        ;;
+                esac
+
+                shift 2
+                ;;
+
+            * ) 
+                
+                case $1 in
+                    '' )
+                        echo 'A task ID is required'
+                        exit 1
+                        ;;
+
+                    -* )
+                        echo "$1 is an invalid option, see help (-h, --help) for available options"
+                        exit 1
+                        ;;
+
+                    *[!0-9]* ) 
+                        echo "task id is always an intenger, please specify a valid task id."
+                        exit 1
+                        ;;
+                    * ) 
+                        TASK_ID=$2
+                        shift
+                        ;;
+                esac
+                ;;
+        esac 
     done
+
+    # TODO implement edit logic
 }
 
 list() {
