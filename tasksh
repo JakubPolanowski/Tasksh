@@ -128,6 +128,8 @@ help() {
             echo "  -t  | --type        : Filters based on one or more task types given"
             echo "  -o  | --overdue     : Filters based on task due date being before today and task being ACTIVE"
             echo "  -no | --not-overdue : Reverse of overdue"
+            echo "  --due               : Filters based on if the task is due on or before specified date"
+            echo "  --scheduled         : FIlters based on if the task is scheduled on specified date" 
             echo "  -s  | --status      : Filters based on status, either DONE or ACTIVE"
             echo "  -d  | --detailed    : Each task is output in a detailed view (same as in view mode)"
             echo "  -h  | --help        : Prints help information"
@@ -473,7 +475,7 @@ agenda() {
             echo "Commands:"
             echo "  v [TASK ID]  : Views the given task ID"
             echo "  o            : Lists tasks that are overdue (including due today)"
-            echo "  d | d [DATE] : Lists tasks that are either due today (no date given) or are due on the given date"
+            echo "  d | d [DATE] : Lists tasks that are either due today (no date given) or are due on the given date. This includes ACTIVE tasks due prior to given date (or today)"
             echo "  s | s [DATE] : Lists tasks that are either scheduled today (no date given) or are scheduled on the given date"
             echo "  t            : Lists tasks that are either due today, scheduled today, or do not have a due or scheduled date"
             echo "  to           : Lists tasks that are either due tomorrow or scheduled tomorrow (unlike [t]oday, tasks without due/scheduling dates will not be included)"
@@ -507,13 +509,32 @@ agenda() {
             ;;
 
         d | due )
-            echo "NOT YET IMPLEMENTED" # TODO implement
+            TASK_DUE_DATE=$(echo "$answer" | cut -d' ' -f2)
+
+            if [ "$TASK_DUE_DATE" = "$answer" ]; then
+                list _ -o
+            elif TASK_DUE_DATE=$(date -d "$TASK_DUE_DATE" +%s); then
+                # TODO IMPLEMENT DUE DATE FILTER IN LIST
+                echo "got date $TASK_DUE_DATE"
+            else
+                echo "Invalid date"
+            fi
             ;;
 
         s | scheduled )
             clear
 
-            echo "NOT YET IMPLEMENTED" # TODO implement
+            TASK_SCHEDULE_DATE=$(echo "$answer" | cut -d' ' -f2)
+
+            if [ "$TASK_SCHEDULE_DATE" = "$answer" ]; then
+                echo "NOT IMPLEMENTED" # TODO IMPLEMENT SCHEDULE FILTER IN LIST
+                # list _ -o
+            elif TASK_SCHEDULE_DATE=$(date -d "$TASK_SCHEDULE_DATE" +%s); then
+                # TODO IMPLEMENT DUE DATE FILTER IN LIST
+                echo "got date $TASK_SCHEDULE_DATE"
+            else
+                echo "Invalid date"
+            fi
             ;;
 
         t | today )
@@ -976,6 +997,40 @@ list() {
                 shift 1
                 ;;
 
+            --due )
+                if ( echo "${2:--x}" | grep -qe '^-.*' ); then
+                    echo "due (--due) requires one argument, got none"
+                    exit 1
+                elif ( ! echo "${3:--x}" | grep -qe '^-.*' ); then
+                    echo "due (--due) only takes one argument, got more than one"
+                    exit 1
+                fi
+
+                if ! TASK_DUE_DATE=$(date -d "$2" +%s); then
+                    echo "Invalid date"
+                    exit 1
+                fi
+
+                shift 2
+                ;;
+
+            --scheduled )
+                if ( echo "${2:--x}" | grep -qe '^-.*' ); then
+                    echo "scheduled (--scheduled) requires one argument, got none"
+                    exit 1
+                elif ( ! echo "${3:--x}" | grep -qe '^-.*' ); then
+                    echo "scheduled (--scheduled) only takes one argument, got more than one"
+                    exit 1
+                fi
+
+                if ! TASK_SCHEDULED_DATE=$(date -d "$2" +%s); then
+                    echo "Invalid date"
+                    exit 1
+                fi
+
+                shift 2
+                ;;
+
             -s | --status )
                 if ( echo "${2:--x}" | grep -qe '^-.*' ); then
                     echo "status (-s, --status) requires one argument, got none"
@@ -1050,6 +1105,22 @@ list() {
                     continue
                 fi
             elif [ "$OVERDUE" = true ]; then
+                continue
+            fi
+        fi
+
+        if [ -n "$TASK_DUE_DATE" ]; then
+            if [ -z "$TASK_DUE" ]; then
+                continue
+            elif [ "$TASK_DUE" -gt "$TASK_DUE_DATE" ]; then
+                continue
+            fi
+        fi
+
+        if [ -n "$TASK_SCHEDULED_DATE" ]; then
+            if [ -z "$TASK_SCHEDULED" ]; then
+                continue
+            elif [ ! "$TASK_SCHEDULED_DATE" -eq "$TASK_SCHEDULED" ]; then
                 continue
             fi
         fi
