@@ -78,7 +78,11 @@ help() {
             echo "Usage: $NAME config [OPTIONS]..."
             echo "Edit $NAME configuration"
             echo 
-            # TODO add remaining docs
+            echo "Options:"
+            echo "  -f | --folder : Changes the tasksh folder (the folder in which all the tasks are stored"
+            echo
+            echo "Examples:"
+            echo "  $NAME config -f ~/tasksh"
         ;;
 
         mark )
@@ -193,7 +197,7 @@ configure() {
                 case "${YN:-n}" in
                     y ) 
                         echo "Successfully created TASKSH folder ($TASKSH_DIR)"
-                        if echo "TASKSH_DIR=\"$TASKSH_DIR\"" >> $CONFIG; then
+                        if echo "TASKSH_DIR=\"$TASKSH_DIR\"" > $CONFIG; then
                             echo "Successfully added TASKSH_DIR to TASKSH config"
                         else
                             echo "FAILED to add TASKSH_DIR to TASKSH config"
@@ -229,7 +233,7 @@ create_tasksh_dir() {
             y ) 
                 if mkdir -p "$TASKSH_DIR"; then
                     echo "Successfully created TASKSH folder ($TASKSH_DIR)"
-                    if echo "TASKSH_DIR=\"$TASKSH_DIR\"" >> $CONFIG; then
+                    if echo "TASKSH_DIR=\"$TASKSH_DIR\"" > $CONFIG; then
                         echo "Successfully added TASKSH_DIR to TASKSH config"
                     else
                         echo "FAILED to add TASKSH_DIR to TASKSH config"
@@ -536,10 +540,67 @@ agenda() {
     done
 }
 
-config() {
+config() { 
     shift 
 
-    # TODO
+    while [ "$#" -gt 0 ]; do
+
+        case "$1" in
+
+            -f | --folder ) 
+                if ( echo "${2:--x}" | grep -qe '^-.*' ); then
+                    echo "tasksh folder (-f, --folder) requires one argument, the tasksh folder path"
+                    exit 1
+                elif ( ! echo "${3:--x}" | grep -qe '^-.*' ); then
+                    echo "tasksh folder (-f, --folder) only takes one argument, the tasksh folder path, got more than one argument"
+                    exit 1
+                fi
+
+                if [ ! -d "$TASKSH_DIR" ]; then
+                    create_tasksh_dir
+
+                elif [ "$(ls -A "$TASKSH_DIR")" ]; then
+                    echo "$TASKSH_DIR is not empty, are you sure you want to use this folder? y/[n]"
+
+                    while true; do
+                        read -r YN
+                        case "${YN:-n}" in
+                            y ) 
+                                echo "Successfully created TASKSH folder ($TASKSH_DIR)"
+                                if echo "TASKSH_DIR=\"$TASKSH_DIR\"" > $CONFIG; then
+                                    echo "Successfully added TASKSH_DIR to TASKSH config"
+                                else
+                                    echo "FAILED to add TASKSH_DIR to TASKSH config"
+                                    exit 1
+                                fi
+
+                                break
+                                ;;
+
+                            n ) 
+                                echo "TASKSH requires a folder to function, exiting"
+
+                                exit 1
+                                ;;
+
+                            * ) echo "Invalid response, input y or n";;
+                        esac
+                    done
+                fi
+
+                shift 2
+                ;;
+
+            -h | --help)
+                help config
+                ;;
+
+            * )
+                echo "$1 is an invalid options, see help (-h, --help) for available options"
+                exit 1
+                ;;
+        esac 
+    done
 }
 
 mark() {
