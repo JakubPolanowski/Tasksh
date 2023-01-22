@@ -28,7 +28,7 @@ help() {
             echo "Usage: $NAME [mode] [OPTIONS]..."
             echo "Manage (add, edit, view, etc.) tasks."
             echo 
-            echo "$NAME has 8 modes, (a)dd, (ag)enda, (c)onfig, (d)one, (e)dit, (l)ist,"
+            echo "$NAME has 8 modes, (a)dd, (ag)enda, (c)onfig, (m)ark, (e)dit, (l)ist,"
             echo "(r)emove, and (v)iew."
             echo "Each mode has different functionality, to see usage for use:"
             echo "  $NAME [mode] -h"
@@ -88,12 +88,19 @@ help() {
             # TODO add remaining docs
         ;;
 
-        mark_done )
-            echo "Usage:     $NAME done [TASK_ID] [OPTIONS]..."
-            echo "Alternate: $NAME done [OPTIONS]..."
-            echo "Mark a task as done."
+        mark )
+            echo "Usage:     $NAME mark [TASK_ID]"
+            echo "Alternate: $NAME mark [TASK_ID] [OPTIONS]..."
+            echo "Mark a task as done (or alternatively a done task as active)."
+            echo "If no options are given, will default to marking the provided TASK_ID as done"
             echo 
-            # TODO add remaining docs
+            echo "Options:"
+            echo "  -a | --active : Sets the task as active (if task is already active, has no effect)"
+            echo "  -d | --done   : Sets the task as done (if task is already done, has no effect)"
+            echo
+            echo "Examples:"
+            echo "  $NAME mark 1"
+            echo "  $NAME mark -d 1"
         ;; 
 
         edit )
@@ -497,42 +504,79 @@ config() {
     done
 }
 
-mark_done() {
-    shift 
+mark() {
+    shift # shift over mode
 
-    SHORT=h # TODO implemented options
-    LONG=help
+    # when marking, default to done
+    TASK_STATUS="DONE"
 
-    OPTS=$(getopt -n "$NAME" -o $SHORT -l $LONG -- "$@")
-    if [ $? -ne -0 ]; then
-        exit 1
-    fi
+    while [ "$#" -gt 0 ]; do
 
-    if [ "$#" -eq 0 ]; then
-        help mark_done
-    fi
+        case "$1" in
 
-    eval set -- "$OPTS"
+            -a | --active ) 
+                if ( echo "${2:--x}" | grep -qe '^-.*' ); then
+                    echo "active (-a, --active) requires one argument, the task id"
+                    exit 1
+                elif ( ! echo "${3:--x}" | grep -qe '^-.*' ); then
+                    echo "active (-a, --active) only takes one argument, the task id, got more than one argument"
+                    exit 1
+                fi
 
-    while :; do
-        case "$1" in # TODO implemented options
+                if ( echo "$2" | grep -qe "^[0-9][0-9]*$" ); then
+                    TASK_ID=$2
+                else
+                    echo "invalid task id, task ids can only be unsigned integer numbers"
+                    exit 1
+                fi
 
-        -h | --help)
-            help mark_done
-            ;;
+                TASK_STATUS="ACTIVE"
 
-        --)
-            shift
-            break
-            ;;
+                shift 2
+                ;;
 
-        *)
-            echo "ERROR: Invalid option, see help (-h, --help)" 
-            exit 1   
-            ;;
+            -d | --done ) 
+                if ( echo "${2:--x}" | grep -qe '^-.*' ); then
+                    echo "done (-d, --done) requires one argument, the task id"
+                    exit 1
+                elif ( ! echo "${3:--x}" | grep -qe '^-.*' ); then
+                    echo "done (-d, --done) only takes one argument, the task id, got more than one argument"
+                    exit 1
+                fi
 
-        esac
+                if ( echo "$2" | grep -qe "^[0-9][0-9]*$" ); then
+                    TASK_ID=$2
+                else
+                    echo "invalid task id, task ids can only be unsigned integer numbers"
+                    exit 1
+                fi
+
+                TASK_STATUS="ACTIVE"
+
+                shift 2
+                ;;
+
+            -h | --help)
+                help mark
+                ;;
+
+            * )
+                if ( echo "${1:--x}" | grep -qe '^-.*' ); then
+                    echo "$1 is an invalid options, see help (-h, --help) for available options"
+                    exit 1
+                elif ( echo "$2" | grep -qe "^[0-9][0-9]*$" ); then
+                    TASK_ID=$1
+                else
+                    echo "invalid task id, task ids can only be unsigned integer numbers"
+                    exit 1
+                fi
+
+                shift
+                ;;
+        esac 
     done
+
+    # TODO IMPLEMENT TASK PARSING
 }
 
 edit() {
@@ -920,8 +964,8 @@ case "$1" in
         config "$@"
         ;;
 
-    d | done )
-        mark_done "$@"
+    m | mark )
+        mark "$@"
         ;;
 
     e | edit )
