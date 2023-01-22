@@ -500,6 +500,7 @@ agenda() {
             fi
 
             echo 
+            TASK_ID=""
         
             ;;
 
@@ -512,13 +513,14 @@ agenda() {
             TASK_DUE_DATE=$(echo "$answer" | cut -d' ' -f2)
 
             if [ "$TASK_DUE_DATE" = "$answer" ]; then
+                TASK_DUE_DATE=""
                 list _ -o
-            elif TASK_DUE_DATE=$(date -d "$TASK_DUE_DATE" +%s); then
-                # TODO IMPLEMENT DUE DATE FILTER IN LIST
-                echo "got date $TASK_DUE_DATE"
             else
-                echo "Invalid date"
+                if ( ! list _ --due "$TASK_DUE_DATE"); then
+                    echo "INVALID: date invalid"
+                fi
             fi
+            TASK_DUE_DATE=""
             ;;
 
         s | scheduled )
@@ -527,14 +529,16 @@ agenda() {
             TASK_SCHEDULE_DATE=$(echo "$answer" | cut -d' ' -f2)
 
             if [ "$TASK_SCHEDULE_DATE" = "$answer" ]; then
-                echo "NOT IMPLEMENTED" # TODO IMPLEMENT SCHEDULE FILTER IN LIST
-                # list _ -o
-            elif TASK_SCHEDULE_DATE=$(date -d "$TASK_SCHEDULE_DATE" +%s); then
-                # TODO IMPLEMENT DUE DATE FILTER IN LIST
-                echo "got date $TASK_SCHEDULE_DATE"
+                TASK_SCHEDULE_DATE=""
+                if ( ! list _ --scheduled "$(date +"%m/%d/%Y")"); then
+                    echo "INVALID: date invalid"
+                fi
             else
-                echo "Invalid date"
+                if ( ! list _ --scheduled "$TASK_SCHEDULE_DATE"); then
+                    echo "INVALID: date invalid"
+                fi
             fi
+            TASK_SCHEDULE_DATE=""
             ;;
 
         t | today )
