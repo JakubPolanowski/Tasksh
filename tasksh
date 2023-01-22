@@ -477,8 +477,6 @@ agenda() {
             echo "  o            : Lists tasks that are overdue (including due today)"
             echo "  d | d [DATE] : Lists tasks that are either due today (no date given) or are due on the given date. This includes ACTIVE tasks due prior to given date (or today)"
             echo "  s | s [DATE] : Lists tasks that are either scheduled today (no date given) or are scheduled on the given date"
-            echo "  t            : Lists tasks that are either due today, scheduled today, or do not have a due or scheduled date"
-            echo "  to           : Lists tasks that are either due tomorrow or scheduled tomorrow (unlike [t]oday, tasks without due/scheduling dates will not be included)"
             echo "  a            : Returns to the starting agenda view"
             echo "  q            : Quits"
             echo "  h            : Prints help information"
@@ -530,28 +528,17 @@ agenda() {
 
             if [ "$TASK_SCHEDULE_DATE" = "$answer" ]; then
                 TASK_SCHEDULE_DATE=""
-                if ( ! list _ --scheduled "$(date +"%m/%d/%Y")"); then
+                if ( ! list _ --scheduled "$(date +"%m/%d/%Y")" ); then
                     echo "INVALID: date invalid"
                 fi
             else
-                if ( ! list _ --scheduled "$TASK_SCHEDULE_DATE"); then
+                if ( ! list _ --scheduled "$TASK_SCHEDULE_DATE" ); then
                     echo "INVALID: date invalid"
                 fi
             fi
             TASK_SCHEDULE_DATE=""
             ;;
-
-        t | today )
-            clear
-
-            echo "NOT YET IMPLEMENTED" # TODO
-            ;;
-
-        to | tomorrow )
-            clear
-            echo "NOT YET IMPLEMENTED" # TODO
-            ;;
-
+            
         a | agenda )
             clear
             list _
