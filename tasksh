@@ -125,9 +125,19 @@ help() {
 
         list )
             echo "Usage: $NAME list [OPTIONS]..."
-            echo "List tasks."
+            echo "Lists existing tasks."
             echo 
-            # TODO add remaining docs
+            echo "Options:"
+            echo "  -t  | --type        : Filters based on one or more task types given"
+            echo "  -o  | --overdue     : Filters based on task due date being before today and task being ACTIVE"
+            echo "  -no | --not-overdue : Reverse of overdue"
+            echo "  -s  | --status      : Filters based on status, either DONE or ACTIVE"
+            echo "  -d  | --detailed    : Each task is output in a detailed view (same as in view mode)"
+            echo "  -h  | --help        : Prints help information"
+            echo 
+            echo "Examples:"
+            echo "  $NAME list"
+            echo "  $NAME list --type TODO URGENT --detailed"
         ;;
 
         remove )
