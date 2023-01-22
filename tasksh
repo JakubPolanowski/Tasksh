@@ -931,33 +931,33 @@ remove() {
         exit 1
     fi
 
-    # TODO finish implementation
     if [ ! "$NO_CONFIRM" = true ]; then
-        echo 'confirm'
+        echo "Are you sure you wish to permanently remove task $TASK_ID ($TASK_PATH)? (y/n)"
+        while true; do
+            read -r answer
+            case "$answer" in 
+
+            y | Y )
+                break
+                ;;
+
+            n | N )
+                exit 0
+                ;;
+
+            * )
+                echo "Invalid reponse, must be either 'y' or 'n'"
+                ;;
+            
+            esac
+        done
     fi
 
-    echo $TASK_PATH
-
-    # if [ "$TASK_STATUS" = "ACTIVE" ]; then
-    #     TASK_PATH_NEW=$(echo "$TASK_PATH" | sed 's/.DONE$/.ACTIVE/')
-    # elif [ "$TASK_STATUS" = "DONE" ]; then
-    #     TASK_PATH_NEW=$(echo "$TASK_PATH" | sed 's/.ACTIVE$/.DONE/')
-    # else
-    #     echo "INVALID TASK_STATUS! THIS IS A PROBLEM WITH TASKSH"
-    #     exit 1
-    # fi
-
-
-    # if [ "$TASK_PATH" = "$TASK_PATH_NEW" ]; then
-    #     echo "task $TASK_ID is already $TASK_STATUS"
-    #     exit 0
-    # fi
-
-    # if ! mv "$TASK_PATH" "$TASK_PATH_NEW"; then
-    #     echo "Failed to update task due to failure to rename task file ($TASK_PATH)"
-    #     echo "This is likely a permissions error. Ensure that the folder and file has read and write permissions"
-    #     exit 1
-    # fi
+    if ! rm "$TASK_PATH"; then
+        echo "Failed to remove task."
+        echo "This is likely a permissions error. Ensure that the folder and file have read and write permissions"
+        exit 1
+    fi
 }
 
 view() {
