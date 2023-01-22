@@ -502,8 +502,7 @@ agenda() {
 
         d | due )
             clear
-
-            echo "NOT YET IMPLEMENTED" # TODO IMPLEMENT
+            list _ -o
             ;;
 
         s | scheduled )
