@@ -97,6 +97,7 @@ help() {
             echo "Options:"
             echo "  -a | --active : Sets the task as active (if task is already active, has no effect)"
             echo "  -d | --done   : Sets the task as done (if task is already done, has no effect)"
+            echo "  -h | --help   : Prints help information"
             echo
             echo "Examples:"
             echo "  $NAME mark 1"
@@ -138,11 +139,15 @@ help() {
         ;;
 
         view )
-            echo "Usage:     $NAME view [TASK_ID] [OPTIONS]..."
-            echo "Alternate: $NAME view [OPTIONS]..."
+            echo "Usage:     $NAME view [TASK_ID]"
+            echo "Alternate: $NAME view [-h | --help]"
             echo "View a task."
             echo 
-            # TODO add remaining docs
+            echo "Options:"
+            echo "  -h  | --help                 : Prints help information"
+            echo
+            echo "Examples:"
+            echo "  $NAME view 1"
         ;;
         
         * )
