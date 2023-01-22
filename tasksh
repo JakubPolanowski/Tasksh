@@ -472,6 +472,7 @@ agenda() {
             echo 
             echo "Commands:"
             echo "  v [TASK ID]  : Views the given task ID"
+            echo "  o            : Lists tasks that are overdue (including due today)"
             echo "  d | d [DATE] : Lists tasks that are either due today (no date given) or are due on the given date"
             echo "  s | s [DATE] : Lists tasks that are either scheduled today (no date given) or are scheduled on the given date"
             echo "  t            : Lists tasks that are either due today, scheduled today, or do not have a due or scheduled date"
@@ -500,9 +501,13 @@ agenda() {
         
             ;;
 
-        d | due )
+        o | overdue )  
             clear
             list _ -o
+            ;;
+
+        d | due )
+            echo "NOT YET IMPLEMENTED" # TODO implement
             ;;
 
         s | scheduled )
