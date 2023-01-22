@@ -876,41 +876,82 @@ list() {
 }
 
 remove() {
-    shift 
+    shift # shift over mode
 
-    SHORT=h # TODO implemented options
-    LONG=help
-
-    OPTS=$(getopt -n "$NAME" -o $SHORT -l $LONG -- "$@")
-    if [ $? -ne -0 ]; then
+    if [ "$#" -eq 0 ]; then
+        echo "task id is required for remove mode."
         exit 1
     fi
 
-    if [ "$#" -eq 0 ]; then
-        help remove
+    while [ "$#" -gt 0 ]; do
+
+        case "$1" in
+
+            -n | --no-confirm ) 
+
+                NO_CONFIRM=true
+                shift
+                ;;
+
+            -h | --help)
+                help remove
+                ;;
+
+            * )
+                if ( echo "${1:--x}" | grep -qe '^-.*' ); then
+                    echo "$1 is an invalid options, see help (-h, --help) for available options"
+                    exit 1
+                elif ( echo "$1" | grep -qe "^[0-9][0-9]*$" ); then
+                    TASK_ID=$1
+                else
+                    echo "invalid task id, task ids can only be unsigned integer numbers"
+                    exit 1
+                fi
+
+                shift
+                ;;
+        esac 
+    done
+
+    # the id.*.*.* is because in the task file format, there are 3 dots seperating id, scheduling, type, and status
+    if ! TASK_PATH=$(ls "$TASKSH_DIR/$TASK_ID".*.*.* -R 2>/dev/null); then
+        echo "No task with ID $TASK_ID found"
+        exit 1
     fi
 
-    eval set -- "$OPTS"
+    if [ "$(echo "$TASK_PATH" | wc -l)" -gt 1 ]; then
+        echo "Multiple matches found, this is likely do manually modification of tasksh folder ($TASKSH_DIR). This requires a manually fix, inside the tasksh folder, change the file names such that no tasks share the same id (file name format is ID.SCHEDULING.TYPE.STATUS."
+        echo "$TASK_PATH"
+        exit 1
+    fi
 
-    while :; do
-        case "$1" in # TODO implemented options
+    # TODO finish implementation
+    if [ ! "$NO_CONFIRM" = true ]; then
+        echo 'confirm'
+    fi
 
-        -h | --help)
-            help remove
-            ;;
+    echo $TASK_PATH
 
-        --)
-            shift
-            break
-            ;;
+    # if [ "$TASK_STATUS" = "ACTIVE" ]; then
+    #     TASK_PATH_NEW=$(echo "$TASK_PATH" | sed 's/.DONE$/.ACTIVE/')
+    # elif [ "$TASK_STATUS" = "DONE" ]; then
+    #     TASK_PATH_NEW=$(echo "$TASK_PATH" | sed 's/.ACTIVE$/.DONE/')
+    # else
+    #     echo "INVALID TASK_STATUS! THIS IS A PROBLEM WITH TASKSH"
+    #     exit 1
+    # fi
 
-        *)
-            echo "ERROR: Invalid option, see help (-h, --help)" 
-            exit 1   
-            ;;
 
-        esac
-    done
+    # if [ "$TASK_PATH" = "$TASK_PATH_NEW" ]; then
+    #     echo "task $TASK_ID is already $TASK_STATUS"
+    #     exit 0
+    # fi
+
+    # if ! mv "$TASK_PATH" "$TASK_PATH_NEW"; then
+    #     echo "Failed to update task due to failure to rename task file ($TASK_PATH)"
+    #     echo "This is likely a permissions error. Ensure that the folder and file has read and write permissions"
+    #     exit 1
+    # fi
 }
 
 view() {
