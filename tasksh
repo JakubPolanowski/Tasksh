@@ -970,7 +970,7 @@ view() { # TODO add editor open option
             TASK_DUE_PARSED="FAILED TO PARSE ($TASK_DUE)"
         fi
         # check overview
-        if [ "$(date +%s)" -gt "$TASK_DUE" ]; then
+        if [ "$(date +%s)" -gt "$TASK_DUE" ] && [ "$TASK_STATUS" = "ACTIVE" ]; then
             TASK_OVERDUE=y
         fi
     echo "DUE        : $TASK_DUE_PARSED ${TASK_OVERDUE:+[OVERDUE!]}"
