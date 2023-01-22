@@ -452,77 +452,13 @@ add() {
 agenda() {
     shift 
 
-    SHORT=h # TODO implemented options
-    LONG=help
-
-    OPTS=$(getopt -n "$NAME" -o $SHORT -l $LONG -- "$@")
-    if [ $? -ne -0 ]; then
-        exit 1
-    fi
-
-    if [ "$#" -eq 0 ]; then
-        help agenda
-    fi
-
-    eval set -- "$OPTS"
-
-    while :; do
-        case "$1" in # TODO implemented options
-
-        -h | --help)
-            help agenda
-            ;;
-
-        --)
-            shift
-            break
-            ;;
-
-        *)
-            echo "ERROR: Invalid option, see help (-h, --help)" 
-            exit 1   
-            ;;
-
-        esac
-    done
+    # TODO
 }
 
 config() {
     shift 
 
-    SHORT=h # TODO implemented options
-    LONG=help
-
-    OPTS=$(getopt -n "$NAME" -o $SHORT -l $LONG -- "$@")
-    if [ $? -ne -0 ]; then
-        exit 1
-    fi
-
-    if [ "$#" -eq 0 ]; then
-        help config
-    fi
-
-    eval set -- "$OPTS"
-
-    while :; do
-        case "$1" in # TODO implemented options
-
-        -h | --help)
-            help config
-            ;;
-
-        --)
-            shift
-            break
-            ;;
-
-        *)
-            echo "ERROR: Invalid option, see help (-h, --help)" 
-            exit 1   
-            ;;
-
-        esac
-    done
+    # TODO
 }
 
 mark() {
