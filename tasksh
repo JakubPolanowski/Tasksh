@@ -843,41 +843,122 @@ edit() {
     
 }
 
-list() {
-    shift 
+list() { # TODO rework for list
+    shift # shift over mode
 
-    SHORT=h # TODO implemented options
-    LONG=help
+    while [ "$#" -gt 0 ]; do
 
-    OPTS=$(getopt -n "$NAME" -o $SHORT -l $LONG -- "$@")
-    if [ $? -ne -0 ]; then
-        exit 1
-    fi
+        case "$1" in
 
-    if [ "$#" -eq 0 ]; then
-        help list
-    fi
+            -t | --type )
+                if ( echo "${2:--x}" | grep -qe '^-.*' ); then
+                    echo "type (-t, --type) requires one or more arguments, got none"
+                    exit 1
+                fi
 
-    eval set -- "$OPTS"
 
-    while :; do
-        case "$1" in # TODO implemented options
+                TASK_TYPE_REGEX=".*\.$2"
+                
+                shift 2
 
-        -h | --help)
-            help list
-            ;;
+                while [ "$#" -gt 0 ] && ( ! echo "${1:--x}" | grep -qe '^-.*' ); do
+                    TASK_TYPE_REGEX="$TASK_TYPE_REGEX\|$1"
+                    shift
+                done
 
-        --)
-            shift
-            break
-            ;;
+                TASK_TYPE_REGEX="$TASK_TYPE_REGEX\..*"
+                ;;
 
-        *)
-            echo "ERROR: Invalid option, see help (-h, --help)" 
-            exit 1   
-            ;;
+            -o | --overdue )
 
-        esac
+                OVERDUE=true
+                TASK_STATUS="ACTIVE"
+
+                shift 1
+                ;;
+
+            -no | --not-overdue )
+
+                OVERDUE=false
+
+                shift 1
+                ;;
+
+            -s | --status )
+                if ( echo "${2:--x}" | grep -qe '^-.*' ); then
+                    echo "status (-s, --status) requires one argument, got none"
+                    exit 1
+                elif ( ! echo "${3:--x}" | grep -qe '^-.*' ); then
+                    echo "status (-s, --status) only takes one argument, got more than one"
+                    exit 1
+                fi
+
+                case "$2" in 
+
+                    ACTIVE )
+                        TASK_STATUS="$2"
+                        ;;
+                    
+                    DONE )
+                        TASK_STATUS="$2"
+                        ;;
+
+                    * )
+                        echo "Invalid status argument ($2). Valid values are 'ACTIVE' and 'DONE'"
+                        exit 1
+                        ;;
+                esac
+                
+
+                shift 2
+                ;;
+
+            -d | --detailed )
+                DETAILED=true
+                shift
+                ;;
+
+            -h | --help)
+                help list
+                ;;
+
+            * )
+                echo "$1 is an invalid options, see help (-h, --help) for available options"
+                exit 1
+                ;;
+        esac 
+    done
+
+    # iterate over tasks in task dir
+    for task in "$TASKSH_DIR"/*; do
+
+        if [ -n "$TASK_TYPE_REGEX" ] && ( ! echo "$task" | grep -qe "$TASK_TYPE_REGEX" ); then
+            continue
+        fi
+
+        if [ -n "$TASK_STATUS" ] && ( ! echo "$task" | grep -qe ".*\.$TASK_STATUS$" ); then
+            continue
+        fi
+
+        if [ "$OVERDUE" = true ] || [ "$OVERDUE" = false ]; then
+            TASK_TIMING="$(basename "$task" | sed -n 's/^\([0-9][0-9]*\)\.\([a-z][a-z0-9]*\)\.\([A-Za-z0-9][A-Za-z0-9]*\)\.\([A-Z][A-Z]*\)$/\2/p')"
+            TASK_DUE=$(echo "$TASK_TIMING" | sed -n 's/.*d\([0-9][0-9]*\).*/\1/p')
+
+            # shellcheck disable=SC2034
+            if [ -n "$TASK_DUE" ] && ( v=$(date -d "@$TASK_DUE") ); then
+                if [ ! "$(date +%s)" -gt "$TASK_DUE" ] && [ "$OVERDUE" = true ]; then
+                    continue
+                elif [ "$(date +%s)" -gt "$TASK_DUE" ] && [ "$OVERDUE" = false ]; then
+                    continue
+                fi
+            elif [ "$OVERDUE" = true ]; then
+                continue
+            fi
+        fi
+
+        # TODO incorporate detailed
+        
+        echo $task # TODO FORMAT
     done
 }
 
