@@ -74,13 +74,6 @@ help() {
             echo "  $NAME add -s 1/30/2023 -- Another note title"
         ;;
 
-        agenda )
-            echo "Usage: $NAME agenda [OPTIONS]..."
-            echo "View your agenda generated based on tasks"
-            echo 
-            # TODO add remaining docs
-        ;;
-
         config ) 
             echo "Usage: $NAME config [OPTIONS]..."
             echo "Edit $NAME configuration"
@@ -452,7 +445,90 @@ add() {
 agenda() {
     shift 
 
-    # TODO
+    clear
+
+    list _
+
+    while true; do
+        echo "Command (h for help): "
+        read -r answer
+
+        case $(echo "$answer" | cut -d' ' -f1) in 
+
+        h | help )
+            clear
+            
+            echo "Usage: $NAME agenda [OPTIONS]..."
+            echo "View your agenda generated based on tasks"
+            echo 
+            echo "Commands:"
+            echo "  v [TASK ID]  : Views the given task ID"
+            echo "  d | d [DATE] : Lists tasks that are either due today (no date given) or are due on the given date"
+            echo "  s | s [DATE] : Lists tasks that are either scheduled today (no date given) or are scheduled on the given date"
+            echo "  t            : Lists tasks that are either due today, scheduled today, or do not have a due or scheduled date"
+            echo "  to           : Lists tasks that are either due tomorrow or scheduled tomorrow (unlike [t]oday, tasks without due/scheduling dates will not be included)"
+            echo "  a            : Returns to the starting agenda view"
+            echo "  q            : Quits"
+            echo "  h            : Prints help information"
+            echo
+            ;;
+
+        v | view )
+
+            clear
+
+            TASK_ID=$(echo "$answer" | cut -d' ' -f2)
+
+            if ( ! echo "$TASK_ID" | grep -qe "^[0-9][0-9]*$" ); then
+                echo "INVALID: Task ID must be a unsigned integer!"
+            else
+                if (! view _ "$TASK_ID"); then
+                    echo "No task with ID $TASK_ID found"
+                fi
+            fi
+
+            echo 
+        
+            ;;
+
+        d | due )
+            clear
+
+            echo "NOT YET IMPLEMENTED" # TODO IMPLEMENT
+            ;;
+
+        s | scheduled )
+            clear
+
+            echo "NOT YET IMPLEMENTED" # TODO implement
+            ;;
+
+        t | today )
+            clear
+
+            echo "NOT YET IMPLEMENTED" # TODO
+            ;;
+
+        to | tomorrow )
+            clear
+            echo "NOT YET IMPLEMENTED" # TODO
+            ;;
+
+        a | agenda )
+            clear
+            list _
+            ;;
+
+        q | quit )
+            exit 0
+            ;;
+
+        * )
+            echo "Invalid command, see help (h or help)"
+            ;;
+        
+        esac
+    done
 }
 
 config() {
@@ -789,7 +865,7 @@ edit() {
     
 }
 
-list() { 
+list() {  # TODO add due and scheduled to non detailed print
     shift # shift over mode
 
     while [ "$#" -gt 0 ]; do
