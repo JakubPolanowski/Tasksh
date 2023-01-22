@@ -1220,14 +1220,14 @@ view() {
 
     # added scheduled and due if applicable
     if [ -n "$TASK_SCHEDULED" ]; then
-        if ! TASK_SCHEDULED_PARSED=$(date -d "@$TASK_SCHEDULED"); then
+        if ! TASK_SCHEDULED_PARSED=$(date -d "@$TASK_SCHEDULED" +"%m/%d/%Y"); then
             TASK_SCHEDULED_PARSED="FAILED TO PARSE ($TASK_SCHEDULED)"
         fi
     echo "SCHEDULED  : $TASK_SCHEDULED_PARSED"
     fi
 
     if [ -n "$TASK_DUE" ]; then
-        if ! TASK_DUE_PARSED=$(date -d "@$TASK_DUE"); then
+        if ! TASK_DUE_PARSED=$(date -d "@$TASK_DUE" +"%m/%d/%Y"); then
             TASK_DUE_PARSED="FAILED TO PARSE ($TASK_DUE)"
         fi
         # check overview
