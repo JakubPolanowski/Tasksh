@@ -853,7 +853,7 @@ edit() {
     
 }
 
-list() { # TODO rework for list
+list() { 
     shift # shift over mode
 
     while [ "$#" -gt 0 ]; do
@@ -882,7 +882,7 @@ list() { # TODO rework for list
             -o | --overdue )
 
                 OVERDUE=true
-                TASK_STATUS="ACTIVE"
+                TASK_STATUS_FILTER="ACTIVE"
 
                 shift 1
                 ;;
@@ -906,11 +906,11 @@ list() { # TODO rework for list
                 case "$2" in 
 
                     ACTIVE )
-                        TASK_STATUS="$2"
+                        TASK_STATUS_FILTER="$2"
                         ;;
                     
                     DONE )
-                        TASK_STATUS="$2"
+                        TASK_STATUS_FILTER="$2"
                         ;;
 
                     * )
@@ -939,6 +939,11 @@ list() { # TODO rework for list
         esac 
     done
 
+    if [ ! "$DETAILED" = true ]; then
+        printf "%3s | %6s | %10s | %25s | %20s\n" "ID" "STATUS" "TYPE" "TITLE" "PATH" 
+        printf '%*s\n' "98" '' | tr ' ' -
+    fi
+
     # iterate over tasks in task dir
     for task in "$TASKSH_DIR"/*; do
 
@@ -946,7 +951,7 @@ list() { # TODO rework for list
             continue
         fi
 
-        if [ -n "$TASK_STATUS" ] && ( ! echo "$task" | grep -qe ".*\.$TASK_STATUS$" ); then
+        if [ -n "$TASK_STATUS_FILTER" ] && ( ! echo "$task" | grep -qe ".*\.$TASK_STATUS_FILTER$" ); then
             continue
         fi
 
@@ -971,8 +976,16 @@ list() { # TODO rework for list
         if [ "$DETAILED" = true ]; then
             view _ "$TASK_ID"
             printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
-        else
-            echo $TASK_ID $task # TODO FORMAT
+        else 
+
+            TASK_TYPE="$(basename "$task" | sed -n 's/^\([0-9][0-9]*\)\.\([a-z][a-z0-9]*\)\.\([A-Za-z0-9][A-Za-z0-9]*\)\.\([A-Z][A-Z]*\)$/\3/p')"
+            TASK_STATUS="$(basename "$task" | sed -n 's/^\([0-9][0-9]*\)\.\([a-z][a-z0-9]*\)\.\([A-Za-z0-9][A-Za-z0-9]*\)\.\([A-Z][A-Z]*\)$/\4/p')"
+
+            # shellcheck disable=SC1090
+            . "$task"
+
+            # echo "$TASK_ID $TASK_STATUS $TASK_TYPE $TASK_TITLE $task" 
+            printf "%3d | %6s | %10s | %25s | %20s\n" "$TASK_ID" "$TASK_STATUS" "$TASK_TYPE" "$TASK_TITLE" "$task" 
         fi
 
     done
