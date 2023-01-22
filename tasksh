@@ -966,9 +966,15 @@ list() { # TODO rework for list
             fi
         fi
 
-        # TODO incorporate detailed
-        
-        echo $task # TODO FORMAT
+        TASK_ID="$(basename "$task" | sed -n 's/^\([0-9][0-9]*\)\.\([a-z][a-z0-9]*\)\.\([A-Za-z0-9][A-Za-z0-9]*\)\.\([A-Z][A-Z]*\)$/\1/p')"
+
+        if [ "$DETAILED" = true ]; then
+            view _ "$TASK_ID"
+            printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
+        else
+            echo $TASK_ID $task # TODO FORMAT
+        fi
+
     done
 }
 
