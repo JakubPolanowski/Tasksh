@@ -133,9 +133,15 @@ help() {
         remove )
             echo "Usage:     $NAME remove [TASK_ID] [OPTIONS]..."
             echo "Alternate: $NAME remove [OPTIONS]..."
-            echo "Removes a task"
+            echo "Removes a task. Note that by default, a confirmation will be required to remove specified task"
             echo 
-            # TODO add remaining docs
+            echo "Options:"
+            echo "  -n | --no-confirm : Do not ask for confirmation when removing tasking"
+            echo "  -h  | --help      : Prints help information"
+            echo
+            echo "Examples:"
+            echo "  $NAME remove 1"
+            echo "  $NAME remove -n 1"
         ;;
 
         view )
