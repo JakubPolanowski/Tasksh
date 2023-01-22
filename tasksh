@@ -908,7 +908,7 @@ remove() {
     done
 }
 
-view() { # TODO add editor open option
+view() {
     shift 
 
     # accepts either task_ID or -h/--help
