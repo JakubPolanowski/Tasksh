@@ -865,7 +865,7 @@ edit() {
     
 }
 
-list() {  # TODO add due and scheduled to non detailed print
+list() { 
     shift # shift over mode
 
     while [ "$#" -gt 0 ]; do
@@ -952,8 +952,8 @@ list() {  # TODO add due and scheduled to non detailed print
     done
 
     if [ ! "$DETAILED" = true ]; then
-        printf "%3s | %6s | %10s | %25s | %20s\n" "ID" "STATUS" "TYPE" "TITLE" "PATH" 
-        printf '%*s\n' "98" '' | tr ' ' -
+        printf "%3s | %6s | %10s | %25s | %13s | %10s | %20s\n" "ID" "STATUS" "TYPE" "TITLE" "DUE" "SCHEDULED" "PATH" 
+        printf '%*s\n' "121" '' | tr ' ' -
     fi
 
     # iterate over tasks in task dir
@@ -967,10 +967,11 @@ list() {  # TODO add due and scheduled to non detailed print
             continue
         fi
 
-        if [ "$OVERDUE" = true ] || [ "$OVERDUE" = false ]; then
-            TASK_TIMING="$(basename "$task" | sed -n 's/^\([0-9][0-9]*\)\.\([a-z][a-z0-9]*\)\.\([A-Za-z0-9][A-Za-z0-9]*\)\.\([A-Z][A-Z]*\)$/\2/p')"
-            TASK_DUE=$(echo "$TASK_TIMING" | sed -n 's/.*d\([0-9][0-9]*\).*/\1/p')
+        TASK_TIMING="$(basename "$task" | sed -n 's/^\([0-9][0-9]*\)\.\([a-z][a-z0-9]*\)\.\([A-Za-z0-9][A-Za-z0-9]*\)\.\([A-Z][A-Z]*\)$/\2/p')"
+        TASK_SCHEDULED=$(echo "$TASK_TIMING" | sed -n 's/.*s\([0-9][0-9]*\).*/\1/p')
+        TASK_DUE=$(echo "$TASK_TIMING" | sed -n 's/.*d\([0-9][0-9]*\).*/\1/p')
 
+        if [ "$OVERDUE" = true ] || [ "$OVERDUE" = false ]; then
             # shellcheck disable=SC2034
             if [ -n "$TASK_DUE" ] && ( v=$(date -d "@$TASK_DUE") ); then
                 if [ ! "$(date +%s)" -gt "$TASK_DUE" ] && [ "$OVERDUE" = true ]; then
@@ -996,8 +997,28 @@ list() {  # TODO add due and scheduled to non detailed print
             # shellcheck disable=SC1090
             . "$task"
 
+            if [ -n "$TASK_SCHEDULED" ]; then
+                if ! TASK_SCHEDULED_PARSED=$(date -d "@$TASK_SCHEDULED" +"%m/%d/%Y"); then
+                    TASK_SCHEDULED_PARSED="ERROR"
+                fi
+            else
+                TASK_SCHEDULED_PARSED=""
+            fi
+
+            if [ -n "$TASK_DUE" ]; then
+                if ! TASK_DUE_PARSED=$(date -d "@$TASK_DUE" +"%m/%d/%Y"); then
+                    TASK_DUE_PARSED="ERROR"
+                fi
+                # check overdue
+                if [ "$(date +%s)" -gt "$TASK_DUE" ] && [ "$TASK_STATUS" = "ACTIVE" ]; then
+                    TASK_DUE_PARSED="$TASK_DUE_PARSED(*)"
+                fi
+            else
+                TASK_DUE_PARSED=""
+            fi
+
             # echo "$TASK_ID $TASK_STATUS $TASK_TYPE $TASK_TITLE $task" 
-            printf "%3d | %6s | %10s | %25s | %20s\n" "$TASK_ID" "$TASK_STATUS" "$TASK_TYPE" "$TASK_TITLE" "$task" 
+            printf "%3d | %6s | %10s | %25s | %13s | %10s | %20s\n" "$TASK_ID" "$TASK_STATUS" "$TASK_TYPE" "$TASK_TITLE" "$TASK_DUE_PARSED" "$TASK_SCHEDULED_PARSED" "$task" 
         fi
 
     done
